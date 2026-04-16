@@ -160,8 +160,7 @@ async function fetchInfo(placeEn, placeDisplay){
         language: langFull
       })
     });
-    const data = await res.json();
-    lastText = data.text;
+    lastText = await res.text();
     txt.className = 'result-text';
     txt.textContent = lastText;
     audioRow.style.display = 'flex';
