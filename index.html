@@ -166,7 +166,8 @@ async function fetchInfo(placeEn, placeDisplay){
     txt.textContent = lastText;
     audioRow.style.display = 'flex';
   } catch(e){
-    txt.textContent = '⚠️ შეცდომა — სცადე ხელახლა';
+    txt.textContent = '⚠️ შეცდომა: ' + e.message;
+    console.error('Fetch error:', e);
   }
   btn.disabled = false;
 }
