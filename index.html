@@ -210,12 +210,11 @@ function showMapWithAttractions(attractions, lat, lng){
       icon:{path:google.maps.SymbolPath.CIRCLE,scale:16,fillColor:'#1D9E75',fillOpacity:1,strokeColor:'white',strokeWeight:2}
     });
     const iw = new google.maps.InfoWindow({
-      content:`<div style="font-size:13px;font-weight:600;padding:4px">${a.icon||'📍'} ${a.name}</div>`
+      content:'<div style="font-size:13px;font-weight:600;padding:4px">'+( a.icon||'📍')+' '+a.name+'</div>'
     });
     marker.addListener('click',()=>iw.open(map,marker));
     markers.push(marker);
-    };
-    attractions.forEach((a,i)=>geocodeAndMark(a,i));
+  });
 }
 
 // ========== LANGUAGES ==========
@@ -346,14 +345,22 @@ function renderVisitorTypes(){
   menu.innerHTML = VISITOR_TYPES.map(v=>{
     const label = v.labels[lang]||v.labels['en'];
     const isActive = v.value === selectedVisitorType;
-    return `<div onclick="selectVisitor('${v.value}','${v.icon}')"
-      style="display:flex;align-items:center;gap:9px;padding:9px 13px;cursor:pointer;font-size:13px;background:${isActive?'#f0faf6':'white'};transition:background 0.1s"
-      onmouseenter="this.style.background='#f5f5f0'" onmouseleave="this.style.background='${isActive?'#f0faf6':'white'}'">
-      <span style="font-size:16px">${v.icon}</span>
-      <span style="color:#222">${label}</span>
-    </div>`;
+    const bg = isActive ? '#f0faf6' : 'white';
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:9px;padding:9px 13px;cursor:pointer;font-size:13px;background:'+bg;
+    div.innerHTML = '<span style="font-size:16px">'+v.icon+'</span><span style="color:#222">'+label+'</span>';
+    div.addEventListener('mouseenter', ()=>div.style.background='#f5f5f0');
+    div.addEventListener('mouseleave', ()=>div.style.background=bg);
+    div.addEventListener('click', ()=>selectVisitor(v.value, v.icon));
+    return div.outerHTML;
   }).join('');
-  // Update selected display
+  // re-attach events (outerHTML loses them, use event delegation)
+  menu.querySelectorAll('div').forEach((el,i)=>{
+    const v = VISITOR_TYPES[i];
+    el.addEventListener('click', ()=>selectVisitor(v.value, v.icon));
+    el.addEventListener('mouseenter', ()=>el.style.background='#f5f5f0');
+    el.addEventListener('mouseleave', ()=>el.style.background= v.value===selectedVisitorType?'#f0faf6':'white');
+  });
   const cur = VISITOR_TYPES.find(v=>v.value===selectedVisitorType)||VISITOR_TYPES[0];
   const nameEl = document.getElementById('visitor-name');
   const iconEl = document.getElementById('visitor-icon');
