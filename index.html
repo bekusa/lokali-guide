@@ -105,7 +105,7 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
 
     <div style="display:flex;gap:10px;margin-bottom:1.2rem">
       <div style="flex:1">
-        <div class="section-label" id="label-visitor">ვიზიტორის ტიპი</div>
+        <div class="section-label" id="label-visitor">ჩემი ინტერესი</div>
         <div style="position:relative">
           <select id="visitor-type" style="width:100%;padding:9px 13px;border-radius:10px;border:1.5px solid #e5e5e0;font-size:13px;color:#222;background:white;appearance:none;cursor:pointer">
           </select>
@@ -211,7 +211,8 @@ function showMapWithAttractions(attractions, lat, lng){
     });
     marker.addListener('click',()=>iw.open(map,marker));
     markers.push(marker);
-  });
+    };
+    attractions.forEach((a,i)=>geocodeAndMark(a,i));
 }
 
 // ========== LANGUAGES ==========
@@ -244,9 +245,9 @@ const LANGUAGES=[
 ];
 
 const UI={
-  ka:{place:'ადგილი',popular:'პოპულარული ადგილები',search:'ნებისმიერი ადგილი...',ask:'კითხვა',tagline:'AI მოგზაურობის გიდი — ყველა ენაზე',lang_label:'ენა',nearby:'📍 ჩემთან ახლოს სანახაობები',loading_attr:'ლოკაცია და სანახაობები...',loading_guide:'AI გიდი მზადდება...',audio:'▶ ხმოვანი გიდი',stop:'■ გაჩერება',visitor_label:'ვიზიტორის ტიპი',duration_label:'ხანგრძლივობა',tab_nearby:'📍 ადგილები',tab_guide:'🎧 გიდი',search_btn:'📍 ძებნა',gps_btn:'🎯 GPS-ით ავტო-აღმოჩენა',city_ph:'ქალაქი (მაგ: თბილისი)...',map_lbl:'🗺️ რუკა',ph_nearby:'ჩაწერე ქალაქი და<br>იპოვე სანახაობები',ph_guide:'ადგილებიდან აირჩიე სანახაობა<br>და მიიღე პერსონალური აუდიო გიდი',script:'🎙️ სკრიპტი',facts:'💡 ძირითადი ფაქტები',look:'👁️ ყურადღება მიაქციე',tips:'🗺️ პრაქტიკული რჩევები',nb:'☕ ახლოს',full_guide:'🎧 სრული აუდიო გიდი'},
-  en:{place:'Place',popular:'Popular Places',search:'Any place...',ask:'Search',tagline:'AI Travel Guide — Every Language',lang_label:'Language',nearby:'📍 Nearby Attractions',loading_attr:'Finding your location...',loading_guide:'AI guide preparing...',audio:'▶ Audio Guide',stop:'■ Stop',visitor_label:'Visitor Type',duration_label:'Duration',tab_nearby:'📍 Places',tab_guide:'🎧 Guide',search_btn:'📍 Search',gps_btn:'🎯 Auto-detect GPS',city_ph:'City (e.g. Paris)...',map_lbl:'🗺️ Map',ph_nearby:'Enter a city and<br>discover attractions',ph_guide:'Choose an attraction<br>to get your audio guide',script:'🎙️ Script',facts:'💡 Key Facts',look:'👁️ Look For',tips:'🗺️ Practical Tips',nb:'☕ Nearby',full_guide:'🎧 Full Audio Guide'},
-  ru:{place:'Место',popular:'Популярные места',search:'Любое место...',ask:'Найти',tagline:'AI Аудиогид — На любом языке',lang_label:'Язык',nearby:'📍 Рядом со мной',loading_attr:'Определяем локацию...',loading_guide:'ИИ готовит гид...',audio:'▶ Аудиогид',stop:'■ Стоп',visitor_label:'Тип посетителя',duration_label:'Длительность',tab_nearby:'📍 Места',tab_guide:'🎧 Гид',search_btn:'📍 Поиск',gps_btn:'🎯 GPS-определение',city_ph:'Город (напр. Тбилиси)...',map_lbl:'🗺️ Карта',ph_nearby:'Введите город и<br>найдите достопримечательности',ph_guide:'Выберите место<br>для аудиогида',script:'🎙️ Текст',facts:'💡 Ключевые факты',look:'👁️ Обратите внимание',tips:'🗺️ Советы',nb:'☕ Рядом',full_guide:'🎧 Полный аудиогид'},
+  ka:{place:'ადგილი',popular:'პოპულარული ადგილები',search:'ნებისმიერი ადგილი...',ask:'კითხვა',tagline:'AI მოგზაურობის გიდი — ყველა ენაზე',lang_label:'ენა',nearby:'📍 ჩემთან ახლოს სანახაობები',loading_attr:'ლოკაცია და სანახაობები...',loading_guide:'AI გიდი მზადდება...',audio:'▶ ხმოვანი გიდი',stop:'■ გაჩერება',visitor_label:'ჩემი ინტერესი',duration_label:'ხანგრძლივობა',tab_nearby:'📍 ადგილები',tab_guide:'🎧 გიდი',search_btn:'📍 ძებნა',gps_btn:'🎯 GPS-ით ავტო-აღმოჩენა',city_ph:'ქალაქი (მაგ: თბილისი)...',map_lbl:'🗺️ რუკა',ph_nearby:'ჩაწერე ქალაქი და<br>იპოვე სანახაობები',ph_guide:'ადგილებიდან აირჩიე სანახაობა<br>და მიიღე პერსონალური აუდიო გიდი',script:'🎙️ სკრიპტი',facts:'💡 ძირითადი ფაქტები',look:'👁️ ყურადღება მიაქციე',tips:'🗺️ პრაქტიკული რჩევები',nb:'☕ ახლოს',full_guide:'🎧 სრული აუდიო გიდი'},
+  en:{place:'Place',popular:'Popular Places',search:'Any place...',ask:'Search',tagline:'AI Travel Guide — Every Language',lang_label:'Language',nearby:'📍 Nearby Attractions',loading_attr:'Finding your location...',loading_guide:'AI guide preparing...',audio:'▶ Audio Guide',stop:'■ Stop',visitor_label:'My Interest',duration_label:'Duration',tab_nearby:'📍 Places',tab_guide:'🎧 Guide',search_btn:'📍 Search',gps_btn:'🎯 Auto-detect GPS',city_ph:'City (e.g. Paris)...',map_lbl:'🗺️ Map',ph_nearby:'Enter a city and<br>discover attractions',ph_guide:'Choose an attraction<br>to get your audio guide',script:'🎙️ Script',facts:'💡 Key Facts',look:'👁️ Look For',tips:'🗺️ Practical Tips',nb:'☕ Nearby',full_guide:'🎧 Full Audio Guide'},
+  ru:{place:'Место',popular:'Популярные места',search:'Любое место...',ask:'Найти',tagline:'AI Аудиогид — На любом языке',lang_label:'Язык',nearby:'📍 Рядом со мной',loading_attr:'Определяем локацию...',loading_guide:'ИИ готовит гид...',audio:'▶ Аудиогид',stop:'■ Стоп',visitor_label:'Мои интересы',duration_label:'Длительность',tab_nearby:'📍 Места',tab_guide:'🎧 Гид',search_btn:'📍 Поиск',gps_btn:'🎯 GPS-определение',city_ph:'Город (напр. Тбилиси)...',map_lbl:'🗺️ Карта',ph_nearby:'Введите город и<br>найдите достопримечательности',ph_guide:'Выберите место<br>для аудиогида',script:'🎙️ Текст',facts:'💡 Ключевые факты',look:'👁️ Обратите внимание',tips:'🗺️ Советы',nb:'☕ Рядом',full_guide:'🎧 Полный аудиогид'},
 };
 
 function t(key){ return (UI[lang]||UI['en'])[key]||UI['en'][key]||key; }
@@ -458,7 +459,7 @@ function renderAttractions(attractions,city,country,lat,lng){
           <span class="chip chip-amber">⭐ ${a.best_time||''}</span>
           <span class="chip chip-green">⏱ ${a.visit_duration||''}</span>
         </div>
-        <button class="audio-guide-btn" onclick="event.stopPropagation();startGuide('${a.name.replace(/'/g,"\\'")}','${city}, ${country}','${a.name.replace(/'/g,"\\'")}')">
+        <button class="audio-guide-btn" onclick="event.stopPropagation();window._startGuide('${a.name.replace(/'/g,"\\'")}','${city}, ${country}','${a.name.replace(/'/g,"\\'")}')">
           ${t('full_guide')}
         </button>
       </div>
