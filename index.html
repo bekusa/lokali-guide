@@ -72,64 +72,31 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
       </div>
       <span class="app-name">Lokali <span class="badge">MVP</span></span>
     </div>
-    <div class="app-sub">AI მოგზაურობის გიდი — ყველა ენაზე</div>
+    <div class="app-sub" id="app-tagline">AI მოგზაურობის გიდი — ყველა ენაზე</div>
   </div>
 
   <div class="body">
-    <div class="section-label">ენა / Language</div>
-    <div class="lang-bar" id="langs">
-      <button class="lang-btn active" data-lang="ka" data-full="Georgian">🇬🇪 ქართ.</button>
-      <button class="lang-btn" data-lang="en" data-full="English">🇬🇧 EN</button>
-      <button class="lang-btn" data-lang="ru" data-full="Russian">🇷🇺 РУС</button>
-      <button class="lang-btn" data-lang="tr" data-full="Turkish">🇹🇷 TR</button>
-      <button class="lang-btn" data-lang="de" data-full="German">🇩🇪 DE</button>
-      <button class="lang-btn" data-lang="fr" data-full="French">🇫🇷 FR</button>
+    <div class="section-label" id="label-lang">ენა</div>
+    <div class="lang-dropdown-wrap" style="position:relative;margin-bottom:1.2rem">
+      <div class="lang-selected" id="lang-selected" onclick="toggleLangMenu()" style="display:flex;align-items:center;gap:8px;padding:9px 13px;border-radius:10px;border:1.5px solid #e5e5e0;cursor:pointer;background:white;user-select:none">
+        <span id="lang-flag">🇬🇪</span>
+        <span id="lang-name" style="font-size:14px;color:#222;flex:1">ქართული</span>
+        <span style="font-size:10px;color:#aaa">▼</span>
+      </div>
+      <div id="lang-menu" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:white;border:1.5px solid #e5e5e0;border-radius:10px;overflow:hidden;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,0.08);max-height:260px;overflow-y:auto">
+      </div>
     </div>
 
-    <div class="section-label">ადგილი / Place</div>
     <div class="search-row">
       <input type="text" id="custom-input" placeholder="ნებისმიერი ადგილი..." />
       <button id="ask-btn" onclick="askCustom()">კითხვა ↗</button>
     </div>
 
-    <div class="section-label">პოპულარული ადგილები</div>
-    <div class="cards">
-      <div class="card" onclick="selectPlace(this,'Narikala Fortress','Tbilisi, Georgia','ნარიყალას ციხე')">
-        <div class="card-icon">🏰</div>
-        <div class="card-info">
-          <div class="card-type">ციხე-სიმაგრე</div>
-          <div class="card-name">ნარიყალას ციხე</div>
-          <div class="card-loc">📍 თბილისი</div>
-        </div>
-      </div>
-      <div class="card" onclick="selectPlace(this,'National Museum of Georgia','Tbilisi, Georgia','ეროვნული მუზეუმი')">
-        <div class="card-icon">🏛️</div>
-        <div class="card-info">
-          <div class="card-type">მუზეუმი</div>
-          <div class="card-name">საქართველოს ეროვნული მუზეუმი</div>
-          <div class="card-loc">📍 თბილისი</div>
-        </div>
-      </div>
-      <div class="card" onclick="selectPlace(this,'Jvari Monastery','Mtskheta, Georgia','ჯვრის მონასტერი')">
-        <div class="card-icon">⛪</div>
-        <div class="card-info">
-          <div class="card-type">მონასტერი</div>
-          <div class="card-name">ჯვრის მონასტერი</div>
-          <div class="card-loc">📍 მცხეთა</div>
-        </div>
-      </div>
-      <div class="card" onclick="selectPlace(this,'Sighnaghi old town','Kakheti, Georgia','სიღნაღი')">
-        <div class="card-icon">🏘️</div>
-        <div class="card-info">
-          <div class="card-type">ისტორიული ქალაქი</div>
-          <div class="card-name">სიღნაღი</div>
-          <div class="card-loc">📍 კახეთი</div>
-        </div>
-      </div>
-    </div>
+    <div class="section-label" data-label="popular">პოპულარული ადგილები</div>
+    <div class="cards" id="cards-container"></div>
 
     <div id="result-area">
-      <div class="placeholder-box">
+      <div class="placeholder-box" id="placeholder-box">
         <div class="ph-icon">🎧</div>
         <p>აირჩიე ადგილი და მიიღე<br>პერსონალური აუდიო გიდი</p>
       </div>
@@ -141,12 +108,186 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
 let lang='ka', langFull='Georgian', lastScript='', speaking=false;
 const WEBHOOK='https://tsitskabeka.app.n8n.cloud/webhook/guide';
 
-document.querySelectorAll('.lang-btn').forEach(b=>{
-  b.addEventListener('click',()=>{
-    document.querySelectorAll('.lang-btn').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    lang=b.dataset.lang; langFull=b.dataset.full;
+const LANGUAGES=[
+  {code:'ka',full:'Georgian',flag:'🇬🇪',name:'ქართული'},
+  {code:'en',full:'English',flag:'🇬🇧',name:'English'},
+  {code:'ru',full:'Russian',flag:'🇷🇺',name:'Русский'},
+  {code:'tr',full:'Turkish',flag:'🇹🇷',name:'Türkçe'},
+  {code:'de',full:'German',flag:'🇩🇪',name:'Deutsch'},
+  {code:'fr',full:'French',flag:'🇫🇷',name:'Français'},
+  {code:'es',full:'Spanish',flag:'🇪🇸',name:'Español'},
+  {code:'it',full:'Italian',flag:'🇮🇹',name:'Italiano'},
+  {code:'pt',full:'Portuguese',flag:'🇵🇹',name:'Português'},
+  {code:'ar',full:'Arabic',flag:'🇸🇦',name:'العربية'},
+  {code:'zh',full:'Chinese',flag:'🇨🇳',name:'中文'},
+  {code:'ja',full:'Japanese',flag:'🇯🇵',name:'日本語'},
+  {code:'ko',full:'Korean',flag:'🇰🇷',name:'한국어'},
+  {code:'hi',full:'Hindi',flag:'🇮🇳',name:'हिन्दी'},
+  {code:'pl',full:'Polish',flag:'🇵🇱',name:'Polski'},
+  {code:'nl',full:'Dutch',flag:'🇳🇱',name:'Nederlands'},
+  {code:'sv',full:'Swedish',flag:'🇸🇪',name:'Svenska'},
+  {code:'da',full:'Danish',flag:'🇩🇰',name:'Dansk'},
+  {code:'fi',full:'Finnish',flag:'🇫🇮',name:'Suomi'},
+  {code:'nb',full:'Norwegian',flag:'🇳🇴',name:'Norsk'},
+  {code:'cs',full:'Czech',flag:'🇨🇿',name:'Čeština'},
+  {code:'sk',full:'Slovak',flag:'🇸🇰',name:'Slovenčina'},
+  {code:'hu',full:'Hungarian',flag:'🇭🇺',name:'Magyar'},
+  {code:'ro',full:'Romanian',flag:'🇷🇴',name:'Română'},
+  {code:'bg',full:'Bulgarian',flag:'🇧🇬',name:'Български'},
+  {code:'hr',full:'Croatian',flag:'🇭🇷',name:'Hrvatski'},
+  {code:'sr',full:'Serbian',flag:'🇷🇸',name:'Srpski'},
+  {code:'uk',full:'Ukrainian',flag:'🇺🇦',name:'Українська'},
+  {code:'he',full:'Hebrew',flag:'🇮🇱',name:'עברית'},
+  {code:'fa',full:'Persian',flag:'🇮🇷',name:'فارسی'},
+  {code:'id',full:'Indonesian',flag:'🇮🇩',name:'Bahasa Indonesia'},
+  {code:'ms',full:'Malay',flag:'🇲🇾',name:'Bahasa Melayu'},
+  {code:'th',full:'Thai',flag:'🇹🇭',name:'ภาษาไทย'},
+  {code:'vi',full:'Vietnamese',flag:'🇻🇳',name:'Tiếng Việt'},
+  {code:'el',full:'Greek',flag:'🇬🇷',name:'Ελληνικά'},
+  {code:'az',full:'Azerbaijani',flag:'🇦🇿',name:'Azərbaycan'},
+  {code:'am',full:'Armenian',flag:'🇦🇲',name:'Հայերեն'},
+];
+
+const menu=document.getElementById('lang-menu');
+LANGUAGES.forEach(l=>{
+  const item=document.createElement('div');
+  item.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 13px;cursor:pointer;font-size:14px;color:#222;transition:background 0.1s';
+  item.innerHTML=`<span style="font-size:18px">${l.flag}</span><span>${l.name}</span><span style="font-size:11px;color:#aaa;margin-left:auto">${l.full}</span>`;
+  item.addEventListener('mouseenter',()=>item.style.background='#f5f5f0');
+  item.addEventListener('mouseleave',()=>item.style.background='white');
+  item.addEventListener('click',()=>{
+    lang=l.code; langFull=l.full;
+    document.getElementById('lang-flag').textContent=l.flag;
+    document.getElementById('lang-name').textContent=l.name;
+    document.getElementById('lang-menu').style.display='none';
+    updateUI();
   });
+  menu.appendChild(item);
+});
+
+const CARDS_DATA=[
+  {id:'narikala',placeEn:'Narikala Fortress',location:'Tbilisi, Georgia',
+   translations:{
+     ka:{type:'ციხე-სიმაგრე',name:'ნარიყალას ციხე',loc:'თბილისი'},
+     en:{type:'Fortress',name:'Narikala Fortress',loc:'Tbilisi'},
+     ru:{type:'Крепость',name:'Крепость Нарикала',loc:'Тбилиси'},
+     tr:{type:'Kale',name:'Narikala Kalesi',loc:'Tiflis'},
+     de:{type:'Festung',name:'Narikala Festung',loc:'Tiflis'},
+     fr:{type:'Forteresse',name:'Forteresse de Narikala',loc:'Tbilissi'},
+     es:{type:'Fortaleza',name:'Fortaleza Narikala',loc:'Tiflis'},
+     it:{type:'Fortezza',name:'Fortezza Narikala',loc:'Tbilisi'},
+     zh:{type:'要塞',name:'纳里卡拉要塞',loc:'第比利斯'},
+     ja:{type:'要塞',name:'ナリカラ要塞',loc:'トビリシ'},
+     ar:{type:'قلعة',name:'قلعة ناريكالا',loc:'تبليسي'},
+     ko:{type:'요새',name:'나리칼라 요새',loc:'트빌리시'},
+   },icon:'🏰'},
+  {id:'museum',placeEn:'National Museum of Georgia',location:'Tbilisi, Georgia',
+   translations:{
+     ka:{type:'მუზეუმი',name:'საქართველოს ეროვნული მუზეუმი',loc:'თბილისი'},
+     en:{type:'Museum',name:'National Museum of Georgia',loc:'Tbilisi'},
+     ru:{type:'Музей',name:'Национальный музей Грузии',loc:'Тбилиси'},
+     tr:{type:'Müze',name:'Gürcistan Ulusal Müzesi',loc:'Tiflis'},
+     de:{type:'Museum',name:'Nationalmuseum Georgiens',loc:'Tiflis'},
+     fr:{type:'Musée',name:'Musée national de Géorgie',loc:'Tbilissi'},
+     es:{type:'Museo',name:'Museo Nacional de Georgia',loc:'Tiflis'},
+     it:{type:'Museo',name:'Museo Nazionale della Georgia',loc:'Tbilisi'},
+     zh:{type:'博物馆',name:'格鲁吉亚国家博物馆',loc:'第比利斯'},
+     ja:{type:'博物館',name:'グルジア国立博物館',loc:'トビリシ'},
+     ar:{type:'متحف',name:'المتحف الوطني لجورجيا',loc:'تبليسي'},
+     ko:{type:'박물관',name:'조지아 국립박물관',loc:'트빌리시'},
+   },icon:'🏛️'},
+  {id:'jvari',placeEn:'Jvari Monastery',location:'Mtskheta, Georgia',
+   translations:{
+     ka:{type:'მონასტერი',name:'ჯვრის მონასტერი',loc:'მცხეთა'},
+     en:{type:'Monastery',name:'Jvari Monastery',loc:'Mtskheta'},
+     ru:{type:'Монастырь',name:'Монастырь Джвари',loc:'Мцхета'},
+     tr:{type:'Manastır',name:'Jvari Manastırı',loc:'Mtskheta'},
+     de:{type:'Kloster',name:'Kloster Dschvari',loc:'Mzcheta'},
+     fr:{type:'Monastère',name:'Monastère de Jvari',loc:'Mtskheta'},
+     es:{type:'Monasterio',name:'Monasterio de Jvari',loc:'Mtskheta'},
+     it:{type:'Monastero',name:'Monastero di Jvari',loc:'Mtskheta'},
+     zh:{type:'修道院',name:'姆茨赫塔十字架修道院',loc:'姆茨赫塔'},
+     ja:{type:'修道院',name:'ジュワリ修道院',loc:'ムツヘタ'},
+     ar:{type:'دير',name:'دير جفاري',loc:'متسخيتا'},
+     ko:{type:'수도원',name:'즈바리 수도원',loc:'므츠헤타'},
+   },icon:'⛪'},
+  {id:'sighnaghi',placeEn:'Sighnaghi old town',location:'Kakheti, Georgia',
+   translations:{
+     ka:{type:'ისტორიული ქალაქი',name:'სიღნაღი',loc:'კახეთი'},
+     en:{type:'Historic Town',name:'Sighnaghi',loc:'Kakheti'},
+     ru:{type:'Исторический город',name:'Сигнахи',loc:'Кахетия'},
+     tr:{type:'Tarihi Şehir',name:'Sighnaghi',loc:'Kakheti'},
+     de:{type:'Historische Stadt',name:'Signagi',loc:'Kachetien'},
+     fr:{type:'Ville historique',name:'Sighnaghi',loc:'Kakhétie'},
+     es:{type:'Ciudad histórica',name:'Sighnaghi',loc:'Kakheti'},
+     it:{type:'Città storica',name:'Sighnaghi',loc:'Kakheti'},
+     zh:{type:'历史古城',name:'锡格纳吉',loc:'卡赫季'},
+     ja:{type:'歴史的な町',name:'シグナギ',loc:'カヘティ'},
+     ar:{type:'مدينة تاريخية',name:'سيغناغي',loc:'كاختي'},
+     ko:{type:'역사적 도시',name:'시그나기',loc:'카헤티'},
+   },icon:'🏘️'},
+];
+
+function renderCards(){
+  const t = lang;
+  const container = document.getElementById('cards-container');
+  container.innerHTML = CARDS_DATA.map(card=>{
+    const tr = card.translations[t] || card.translations['en'];
+    return `<div class="card" onclick="selectPlace(this,'${card.placeEn}','${card.location}','${tr.name}')">
+      <div class="card-icon">${card.icon}</div>
+      <div class="card-info">
+        <div class="card-type">${tr.type}</div>
+        <div class="card-name">${tr.name}</div>
+        <div class="card-loc">📍 ${tr.loc}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+const UI_TRANSLATIONS={
+  ka:{place:'ადგილი',popular:'პოპულარული ადგილები',search:'ნებისმიერი ადგილი...',ask:'კითხვა',placeholder_title:'🎧 აირჩიე ადგილი',placeholder_sub:'მიიღე პერსონალური აუდიო გიდი',loading:'AI გიდი მზადდება...',audio:'▶ ხმოვანი გიდი',stop:'■ გაჩერება',script:'🎙️ სკრიპტი',facts:'💡 ძირითადი ფაქტები',look:'👁️ ყურადღება მიაქციე',tips:'🗺️ პრაქტიკული რჩევები',nearby:'☕ ახლოს',lang_label:'ენა',tagline:'AI მოგზაურობის გიდი — ყველა ენაზე'},
+  en:{place:'Place',popular:'Popular Places',search:'Any place...',ask:'Search',placeholder_title:'🎧 Choose a place',placeholder_sub:'Get your personal audio guide',loading:'AI guide is preparing...',audio:'▶ Audio Guide',stop:'■ Stop',script:'🎙️ Script',facts:'💡 Key Facts',look:'👁️ Look For',tips:'🗺️ Practical Tips',nearby:'☕ Nearby',lang_label:'Language',tagline:'AI Travel Guide — Every Language'},
+  ru:{place:'Место',popular:'Популярные места',search:'Любое место...',ask:'Найти',placeholder_title:'🎧 Выберите место',placeholder_sub:'Получите персональный аудиогид',loading:'ИИ готовит гид...',audio:'▶ Аудиогид',stop:'■ Стоп',script:'🎙️ Текст',facts:'💡 Ключевые факты',look:'👁️ Обратите внимание',tips:'🗺️ Практические советы',nearby:'☕ Рядом',lang_label:'Язык',tagline:'AI Аудиогид — На любом языке'},
+  tr:{place:'Yer',popular:'Popüler Yerler',search:'Herhangi bir yer...',ask:'Ara',placeholder_title:'🎧 Bir yer seçin',placeholder_sub:'Kişisel sesli rehberinizi alın',loading:'Yapay zeka rehber hazırlıyor...',audio:'▶ Sesli Rehber',stop:'■ Dur',script:'🎙️ Metin',facts:'💡 Temel Bilgiler',look:'👁️ Dikkat Et',tips:'🗺️ Pratik İpuçları',nearby:'☕ Yakın',lang_label:'Dil',tagline:'AI Sesli Rehber — Her Dilde'},
+  de:{place:'Ort',popular:'Beliebte Orte',search:'Beliebiger Ort...',ask:'Suchen',placeholder_title:'🎧 Ort auswählen',placeholder_sub:'Persönlichen Audioguide erhalten',loading:'KI-Guide wird vorbereitet...',audio:'▶ Audioguide',stop:'■ Stopp',script:'🎙️ Skript',facts:'💡 Schlüsselfakten',look:'👁️ Achten Sie auf',tips:'🗺️ Praktische Tipps',nearby:'☕ In der Nähe',lang_label:'Sprache',tagline:'KI Reiseführer — Jede Sprache'},
+  fr:{place:'Lieu',popular:'Lieux populaires',search:'Nimporte quel lieu...',ask:'Chercher',placeholder_title:'🎧 Choisissez un lieu',placeholder_sub:'Obtenez votre guide audio personnel',loading:'Le guide IA se prépare...',audio:'▶ Guide audio',stop:'■ Arrêter',script:'🎙️ Script',facts:'💡 Faits clés',look:'👁️ À observer',tips:'🗺️ Conseils pratiques',nearby:'☕ À proximité',lang_label:'Langue',tagline:'Guide Audio IA — Toutes les langues'},
+  es:{place:'Lugar',popular:'Lugares populares',search:'Cualquier lugar...',ask:'Buscar',placeholder_title:'🎧 Elige un lugar',placeholder_sub:'Obtén tu guía de audio personal',loading:'La guía IA se prepara...',audio:'▶ Guía de audio',stop:'■ Parar',script:'🎙️ Guión',facts:'💡 Datos clave',look:'👁️ Fíjate en',tips:'🗺️ Consejos prácticos',nearby:'☕ Cerca',lang_label:'Idioma',tagline:'Guía de Audio IA — Todos los idiomas'},
+  it:{place:'Luogo',popular:'Luoghi popolari',search:'Qualsiasi luogo...',ask:'Cerca',placeholder_title:'🎧 Scegli un luogo',placeholder_sub:'Ottieni la tua guida audio personale',loading:'La guida AI si prepara...',audio:'▶ Guida audio',stop:'■ Ferma',script:'🎙️ Copione',facts:'💡 Fatti chiave',look:'👁️ Osserva',tips:'🗺️ Consigli pratici',nearby:'☕ Nelle vicinanze',lang_label:'Lingua',tagline:'Guida Audio AI — Ogni lingua'},
+  zh:{place:'地点',popular:'热门地点',search:'任何地方...',ask:'搜索',placeholder_title:'🎧 选择地点',placeholder_sub:'获取您的个人语音导览',loading:'AI导游正在准备...',audio:'▶ 语音导览',stop:'■ 停止',script:'🎙️ 脚本',facts:'💡 关键事实',look:'👁️ 注意观察',tips:'🗺️ 实用提示',nearby:'☕ 附近',lang_label:'语言',tagline:'AI旅游导览 — 所有语言'},
+  ja:{place:'場所',popular:'人気スポット',search:'どんな場所でも...',ask:'検索',placeholder_title:'🎧 場所を選択',placeholder_sub:'パーソナル音声ガイドを取得',loading:'AIガイドを準備中...',audio:'▶ 音声ガイド',stop:'■ 停止',script:'🎙️ スクリプト',facts:'💡 主な事実',look:'👁️ 注目ポイント',tips:'🗺️ 実用的なヒント',nearby:'☕ 近くのスポット',lang_label:'言語',tagline:'AI旅行ガイド — すべての言語'},
+  ar:{place:'المكان',popular:'الأماكن الشهيرة',search:'أي مكان...',ask:'بحث',placeholder_title:'🎧 اختر مكاناً',placeholder_sub:'احصل على دليلك الصوتي الشخصي',loading:'الذكاء الاصطناعي يُعد الدليل...',audio:'▶ الدليل الصوتي',stop:'■ إيقاف',script:'🎙️ النص',facts:'💡 حقائق رئيسية',look:'👁️ انتبه إلى',tips:'🗺️ نصائح عملية',nearby:'☕ بالقرب',lang_label:'اللغة',tagline:'دليل سياحي بالذكاء الاصطناعي — كل اللغات'},
+  ko:{place:'장소',popular:'인기 장소',search:'어느 장소든...',ask:'검색',placeholder_title:'🎧 장소를 선택하세요',placeholder_sub:'개인 오디오 가이드 받기',loading:'AI 가이드 준비 중...',audio:'▶ 오디오 가이드',stop:'■ 중지',script:'🎙️ 스크립트',facts:'💡 주요 사실',look:'👁️ 주목할 점',tips:'🗺️ 실용적인 팁',nearby:'☕ 근처',lang_label:'언어',tagline:'AI 여행 가이드 — 모든 언어'},
+};
+
+function getT(){ return UI_TRANSLATIONS[lang] || UI_TRANSLATIONS['en']; }
+
+function updateUI(){
+  const t=getT();
+  const placeLbl=document.querySelector('[data-label="place"]');
+  const popLbl=document.querySelector('[data-label="popular"]');
+  const inp=document.getElementById('custom-input');
+  const askBtn=document.getElementById('ask-btn');
+  if(placeLbl) placeLbl.textContent=t.place.toUpperCase();
+  if(popLbl) popLbl.textContent=t.popular.toUpperCase();
+  if(inp) inp.placeholder=t.search;
+  if(askBtn) askBtn.textContent=t.ask+' ↗';
+  const tagline=document.getElementById('app-tagline');
+  if(tagline) tagline.textContent=t.tagline;
+  const labelLang=document.getElementById('label-lang');
+  if(labelLang) labelLang.textContent=t.lang_label||'Language';
+  const labelPlace=document.getElementById('label-place');
+  if(labelPlace) labelPlace.textContent=t.place;
+  renderCards();
+  const ph=document.getElementById('placeholder-box');
+  if(ph) ph.innerHTML=`<div class="ph-icon">🎧</div><p>${t.placeholder_title.replace('🎧 ','')}<br>${t.placeholder_sub}</p>`;
+}
+
+function toggleLangMenu(){
+  const m=document.getElementById('lang-menu');
+  m.style.display=m.style.display==='none'?'block':'none';
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.lang-dropdown-wrap')) document.getElementById('lang-menu').style.display='none';
 });
 
 function selectPlace(el,placeEn,location,placeKa){
@@ -167,19 +308,19 @@ function showLoading(){
       <div class="loading" style="justify-content:center">
         <div class="dot"></div><div class="dot"></div><div class="dot"></div>
       </div>
-      <p style="font-size:12px;color:#bbb;margin-top:10px">AI გიდი მზადდება...</p>
+      <p style="font-size:12px;color:#bbb;margin-top:10px">${getT().loading}</p>
     </div>`;
 }
 
 function renderResult(data){
   const secs=data.estimated_duration_seconds||0;
   const mins=Math.round(secs/60);
-  const paraIcons=['🎯','🏛️','💎','🔮','👀','❤️','🗺️','✨','🌿','🎭'];
   const scriptHtml=(data.script||'')
     .split(/\n\n+/)
-    .map((p,i)=>{
+    .filter(p=>p.trim())
+    .map(p=>{
       const clean=p.trim().replace(/\[PAUSE\]/g,'<span class="pause-tag">⏸</span>');
-      return `<p style="margin-bottom:14px;display:flex;gap:8px;align-items:flex-start"><span style="font-size:16px;flex-shrink:0;margin-top:1px">${paraIcons[i%paraIcons.length]}</span><span>${clean}</span></p>`;
+      return `<p style="margin-bottom:13px">${clean}</p>`;
     }).join('');
   const keyFacts=(data.key_facts||[]).map(f=>`<span class="chip chip-green">💡 ${f}</span>`).join('');
   const tipIcons=['🕐','📸','☕','👗','⏱️'];
@@ -195,16 +336,16 @@ function renderResult(data){
       </div>
       <div class="result-body">
         <div class="section-block">
-          <div class="section-head">🎙️ სკრიპტი</div>
+          <div class="section-head">${getT().script}</div>
           <div class="script-text">${scriptHtml}</div>
         </div>
-        ${keyFacts?`<div class="section-block"><div class="section-head">💡 ძირითადი ფაქტები</div><div class="chips">${keyFacts}</div></div>`:''}
-        ${lookFor?`<div class="section-block"><div class="section-head">👁️ ყურადღება მიაქციე</div><div class="chips">${lookFor}</div></div>`:''}
-        ${tips?`<div class="section-block"><div class="section-head">🗺️ პრაქტიკული რჩევები</div><div class="list-items">${tips}</div></div>`:''}
-        ${nearby?`<div class="section-block"><div class="section-head">☕ ახლოს</div><div class="chips">${nearby}</div></div>`:''}
+        ${keyFacts?`<div class="section-block"><div class="section-head">${getT().facts}</div><div class="chips">${keyFacts}</div></div>`:''}
+        ${lookFor?`<div class="section-block"><div class="section-head">${getT().look}</div><div class="chips">${lookFor}</div></div>`:''}
+        ${tips?`<div class="section-block"><div class="section-head">${getT().tips}</div><div class="list-items">${tips}</div></div>`:''}
+        ${nearby?`<div class="section-block"><div class="section-head">${getT().nearby}</div><div class="chips">${nearby}</div></div>`:''}
       </div>
       <div class="audio-bar">
-        <button class="speak-btn" id="speak-btn">▶ ხმოვანი გიდი</button>
+        <button class="speak-btn" id="speak-btn">${getT().audio}</button>
         ${mins?`<span class="duration-badge">~${mins} წთ</span>`:''}
       </div>
     </div>`;
@@ -217,15 +358,15 @@ function toggleSpeak(){
   const btn=document.getElementById('speak-btn');
   if(speaking){
     speechSynthesis.cancel(); speaking=false;
-    btn.textContent='▶ ხმოვანი გიდი'; return;
+    btn.textContent=getT().audio; return;
   }
   const clean=lastScript.replace(/\[PAUSE\]/g,'... ');
   const u=new SpeechSynthesisUtterance(clean);
   const lm={ka:'ka-GE',en:'en-US',ru:'ru-RU',tr:'tr-TR',de:'de-DE',fr:'fr-FR'};
   u.lang=lm[lang]||'en-US';
-  u.onend=()=>{speaking=false; const b=document.getElementById('speak-btn'); if(b) b.textContent='▶ ხმოვანი გიდი';};
+  u.onend=()=>{speaking=false; const b=document.getElementById('speak-btn'); if(b) b.textContent=getT().audio;};
   speechSynthesis.speak(u); speaking=true;
-  btn.textContent='■ გაჩერება';
+  btn.textContent=getT().stop;
 }
 
 async function fetchInfo(placeEn,location,placeDisplay){
@@ -248,10 +389,11 @@ async function fetchInfo(placeEn,location,placeDisplay){
     lastScript=data.script||raw;
     renderResult(data);
   } catch(e){
-    document.getElementById('result-area').innerHTML=`<div class="placeholder-box"><div class="ph-icon">⚠️</div><p>შეცდომა: ${e.message}</p></div>`;
+    document.getElementById('result-area').innerHTML=`<div class="placeholder-box" id="placeholder-box"><div class="ph-icon">⚠️</div><p>შეცდომა: ${e.message}</p></div>`;
   }
   document.getElementById('ask-btn').disabled=false;
 }
+renderCards();
 </script>
 </body>
 </html>
