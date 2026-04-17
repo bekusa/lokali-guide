@@ -485,7 +485,7 @@ function fetchPlacePhoto(name, callback){
   );
 }
 
-let currentAttractions=[];
+let currentAttractions=[], currentCardIndex=-1;
 function renderAttractions(attractions,city,country,lat,lng){
   currentCity=city; currentCountry=country;
   currentAttractions=attractions;
@@ -650,7 +650,7 @@ async function fetchInfoWithParams(placeEn,location,placeDisplay,visitorType,dur
     lastScript=data.script||raw;
     renderGuide(data);
   } catch(e){
-    document.getElementById('result-area').innerHTML='<div class="placeholder-box"><div class="ph-icon">⚠️</div><p>'+e.message+'</p></div>';
+    const _ra1=document.getElementById('result-area'); if(_ra1) _ra1.innerHTML='<div class="placeholder-box"><div class="ph-icon">⚠️</div><p>'+e.message+'</p></div>';
   }
   if(btn) btn.disabled=false;
 }
@@ -675,7 +675,7 @@ async function fetchInfo(placeEn,location,placeDisplay){
     lastScript=data.script||raw;
     renderGuide(data);
   } catch(e){
-    document.getElementById('result-area').innerHTML=`<div class="placeholder-box"><div class="ph-icon">⚠️</div><p>${e.message}</p></div>`;
+    const _ra2=document.getElementById('result-area'); if(_ra2) _ra2.innerHTML=`<div class="placeholder-box"><div class="ph-icon">⚠️</div><p>${e.message}</p></div>`;
   }
   if(btn) btn.disabled=false;
 }
@@ -683,10 +683,7 @@ async function fetchInfo(placeEn,location,placeDisplay){
 function renderGuide(data){
   const secs=data.estimated_duration_seconds||0;
   const mins=Math.round(secs/60);
-  // Clean script - remove any JSON artifacts
-  let cleanScript = (data.script||'');
-  if(cleanScript.trim().startsWith('{') || cleanScript.trim().startsWith('```')) cleanScript='';
-  const scriptHtml=cleanScript.split(/\n\n+/).filter(p=>p.trim()).map(p=>{
+  const scriptHtml=(data.script||'').split(/\n\n+/).filter(p=>p.trim()).map(p=>{
     const clean=p.trim().replace(/\[PAUSE\]/g,'<span class="pause-tag">⏸</span>');
     return `<p style="margin-bottom:13px">${clean}</p>`;
   }).join('');
@@ -697,12 +694,22 @@ function renderGuide(data){
   const nearby=(data.nearby_suggestions||[]).map(n=>`<span class="chip chip-amber">📍 ${n}</span>`).join('');
 
   const backBtn = `<button onclick="switchTab('nearby')" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.4);background:transparent;color:white;font-size:11px;cursor:pointer;margin-bottom:8px">← ${t('tab_nearby')}</button>`;
-  document.getElementById('result-area').innerHTML=`
+  const _ra4=document.getElementById('result-area'); if(_ra4) _ra4.innerHTML=`
     <div class="result-card">
       <div class="result-title-bar">
         ${backBtn}
         <div class="result-title">🎧 ${data.title||'Audio Guide'}</div>
-        ${mins?`<div class="result-duration">⏱ ~${mins} წუთი</div>`:''}
+        <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">
+          ${currentCardIndex>=0 ? (() => {
+            const vt = cardVisitorTypes[currentCardIndex]||'first-time tourist';
+            const dur = cardDurations[currentCardIndex]||3;
+            const vtObj = VISITOR_TYPES.find(v=>v.value===vt)||VISITOR_TYPES[0];
+            const durObj = DURATION_OPTIONS.find(d=>d.dur===dur)||DURATION_OPTIONS[0];
+            return '<span style="font-size:11px;background:rgba(255,255,255,0.2);padding:3px 8px;border-radius:10px">'+vtObj.icon+' '+( vtObj.labels[lang]||vtObj.labels.en)+'</span>'+
+                   '<span style="font-size:11px;background:rgba(255,255,255,0.2);padding:3px 8px;border-radius:10px">'+durObj.icon+' '+(durObj.labels[lang]||durObj.labels.en)+'</span>';
+          })() : ''}
+          ${mins?'<span style="font-size:11px;background:rgba(255,255,255,0.2);padding:3px 8px;border-radius:10px">⏱ ~'+mins+' '+( lang==='ka'?'წთ':'min')+'</span>':''}
+        </div>
       </div>
       <div class="result-body">
         <div><div class="section-head">${t('script')}</div><div class="script-text">${scriptHtml}</div></div>
@@ -723,7 +730,7 @@ window._startGuideWithParams = function(placeEn, location, placeDisplay, visitor
   infoWindows.forEach(w=>w.close());
   switchTab('guide');
   document.querySelector('.app').scrollIntoView({behavior:'smooth',block:'start'});
-  document.getElementById('result-area').innerHTML='<div style="padding:24px;text-align:center"><div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><p style="font-size:12px;color:#bbb;margin-top:10px">'+t('loading_guide')+'</p></div>';
+  const _ra3=document.getElementById('result-area'); if(_ra3) _ra3.innerHTML='<div style="padding:24px;text-align:center"><div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><p style="font-size:12px;color:#bbb;margin-top:10px">'+t('loading_guide')+'</p></div>';
   fetchInfoWithParams(placeEn, location, placeDisplay, visitorType, duration);
 };
 
@@ -786,6 +793,7 @@ document.addEventListener('click', e=>{
 window._startGuideByCard = function(i){
   const a = currentAttractions[i];
   if(!a) return;
+  currentCardIndex = i;
   const visitorType = cardVisitorTypes[i] || 'first-time tourist';
   const duration = cardDurations[i] || 3;
   window._startGuideWithParams(a.name, currentCity+', '+currentCountry, a.name, visitorType, duration);
