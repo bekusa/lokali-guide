@@ -436,22 +436,17 @@ async function loadNearbyAttractions(){
     }
     document.getElementById('map-area').style.display='block';
 
-    const ctrl2=new AbortController();
-    const t2=setTimeout(()=>ctrl2.abort(),120000);
     const res=await fetch(ATTRACTIONS_WEBHOOK,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({city,country,lat,lng,language:langFull}),
-      signal:ctrl2.signal
+      body:JSON.stringify({city,country,lat,lng,language:langFull})
     });
-    clearTimeout(t2);
     const raw=await res.text();
-    let cleaned=raw.trim(); if(cleaned.startsWith('```')){cleaned=cleaned.split('\n').slice(1).join('\n');cleaned=cleaned.replace(/```\s*$/,'').trim();}
-    const data=JSON.parse(cleaned);
+    const data=parseGuideResponse(raw, city);
 
     renderAttractions(data.attractions||[],city,country,lat,lng);
   } catch(e){
-    const amsg=e.name==='AbortError'?'გთხოვ სცადე ხელახლა':e.message; (document.getElementById('attractions-area')||{}).innerHTML=`<div class="placeholder-box"><div class="ph-icon">⚠️</div><p>${amsg}</p></div>`;
+    (document.getElementById('attractions-area')||{}).innerHTML=`<div class="placeholder-box"><div class="ph-icon">⚠️</div><p>${e.message}</p></div>`;
   }
   btn.disabled=false;
 }
@@ -673,15 +668,11 @@ async function fetchInfoWithParams(placeEn,location,placeDisplay,visitorType,dur
   const btn=document.getElementById('ask-btn');
   if(btn) btn.disabled=true;
   try {
-    const ctrl1=new AbortController();
-    const t1=setTimeout(()=>ctrl1.abort(),120000);
     const res=await fetch(GUIDE_WEBHOOK,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({place:placeEn,location,language:langFull,visitor_type:visitorType||'tourist',duration:duration||5}),
-      signal:ctrl1.signal
+      body:JSON.stringify({place:placeEn,location,language:langFull,visitor_type:visitorType||'tourist',duration:duration||5})
     });
-    clearTimeout(t1);
     const raw=await res.text();
     let data;
     try {
