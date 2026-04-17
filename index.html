@@ -441,7 +441,7 @@ async function loadNearbyAttractions(){
       body:JSON.stringify({city,country,lat,lng,language:langFull})
     });
     const raw=await res.text();
-    const cleaned=raw.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim();
+    let cleaned=raw.trim(); if(cleaned.startsWith('```')){cleaned=cleaned.split('\n').slice(1).join('\n');cleaned=cleaned.replace(/```\s*$/,'').trim();}
     const data=JSON.parse(cleaned);
 
     renderAttractions(data.attractions||[],city,country,lat,lng);
@@ -627,7 +627,8 @@ async function fetchInfoWithParams(placeEn,location,placeDisplay,visitorType,dur
     const raw=await res.text();
     let data;
     try {
-      const cleaned=raw.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim();
+      let cleaned=raw.trim();
+      if(cleaned.startsWith('```')){cleaned=cleaned.split('\n').slice(1).join('\n');cleaned=cleaned.replace(/```\s*$/,'').trim();}
       data=JSON.parse(cleaned);
     } catch(e){
       data={title:placeDisplay,script:raw,key_facts:[],tips:[],look_for:[],nearby_suggestions:[]};
@@ -652,7 +653,7 @@ async function fetchInfo(placeEn,location,placeDisplay){
     const raw=await res.text();
     let data;
     try {
-      const cleaned=raw.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim();
+      let cleaned=raw.trim(); if(cleaned.startsWith('```')){cleaned=cleaned.split('\n').slice(1).join('\n');cleaned=cleaned.replace(/```\s*$/,'').trim();}
       data=JSON.parse(cleaned);
     } catch(e){
       data={title:placeDisplay,script:raw,key_facts:[],tips:[],look_for:[],nearby_suggestions:[]};
