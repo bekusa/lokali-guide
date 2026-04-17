@@ -16,9 +16,13 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
 .app-sub{font-size:12px;opacity:0.8;margin-left:44px}
 .body{padding:1.2rem}
 .section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#aaa;margin-bottom:8px}
-.lang-bar{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:1.2rem}
-.lang-btn{padding:5px 11px;border-radius:20px;border:1.5px solid #e5e5e0;font-size:12px;cursor:pointer;background:white;color:#666;transition:all 0.15s}
-.lang-btn.active{background:#1D9E75;color:white;border-color:#1D9E75}
+.lang-dropdown-wrap{position:relative;margin-bottom:1.2rem}
+.lang-selected{display:flex;align-items:center;gap:8px;padding:9px 13px;border-radius:10px;border:1.5px solid #e5e5e0;cursor:pointer;background:white;user-select:none}
+.lang-menu{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:white;border:1.5px solid #e5e5e0;border-radius:10px;overflow:hidden;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,0.08);max-height:260px;overflow-y:auto}
+.lang-item{display:flex;align-items:center;gap:10px;padding:9px 13px;cursor:pointer;font-size:14px;color:#222;transition:background 0.1s}
+.lang-item:hover{background:#f5f5f0}
+.locate-btn{width:100%;padding:11px;border-radius:10px;border:none;background:#0F6E56;color:white;font-size:14px;font-weight:500;cursor:pointer;margin-bottom:1.2rem;transition:opacity 0.15s}
+.locate-btn:disabled{opacity:0.5;cursor:not-allowed}
 .search-row{display:flex;gap:8px;margin-bottom:1.2rem}
 .search-row input{flex:1;padding:9px 13px;border-radius:10px;border:1.5px solid #e5e5e0;font-size:14px;color:#222}
 .search-row input:focus{outline:none;border-color:#1D9E75}
@@ -32,20 +36,19 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
 .card-type{font-size:10px;color:#1D9E75;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:1px}
 .card-name{font-size:14px;font-weight:500;color:#222}
 .card-loc{font-size:11px;color:#999}
-.loading{display:flex;gap:5px;align-items:center;padding:8px 0}
+.loading{display:flex;gap:5px;align-items:center;justify-content:center;padding:8px 0}
 .dot{width:7px;height:7px;border-radius:50%;background:#1D9E75;animation:b 1.2s infinite}
 .dot:nth-child(2){animation-delay:.2s}
 .dot:nth-child(3){animation-delay:.4s}
 @keyframes b{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-7px)}}
 .placeholder-box{border-radius:14px;border:1.5px dashed #ddd;padding:28px;text-align:center}
-.placeholder-box .ph-icon{font-size:34px;margin-bottom:8px}
+.ph-icon{font-size:34px;margin-bottom:8px}
 .placeholder-box p{font-size:13px;color:#bbb;line-height:1.5}
-.result-card{border-radius:14px;border:1.5px solid #e8e8e2;overflow:hidden}
+.result-card{border-radius:14px;border:1.5px solid #e8e8e2;overflow:hidden;margin-bottom:12px}
 .result-title-bar{background:#1D9E75;padding:12px 14px;color:white}
 .result-title{font-size:15px;font-weight:700}
 .result-duration{font-size:11px;opacity:0.8;margin-top:2px}
 .result-body{padding:14px;display:flex;flex-direction:column;gap:14px}
-.section-block{}
 .section-head{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;margin-bottom:7px}
 .script-text{font-size:14px;color:#333;line-height:1.75}
 .pause-tag{display:inline-block;background:#e8f5ee;color:#0F6E56;font-size:10px;padding:1px 6px;border-radius:4px;margin:0 2px;font-weight:700}
@@ -56,11 +59,25 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
 .chip-amber{background:#faeeda;color:#854F0B}
 .list-items{display:flex;flex-direction:column;gap:6px}
 .list-item{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#444;line-height:1.55}
-.list-dot{width:6px;height:6px;border-radius:50%;background:#1D9E75;margin-top:6px;flex-shrink:0}
 .audio-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid #eee;background:#fafaf7}
 .speak-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:20px;border:1.5px solid #ccc;font-size:12px;cursor:pointer;background:white;color:#555;transition:all 0.15s}
 .speak-btn:hover{border-color:#1D9E75;color:#1D9E75}
 .duration-badge{font-size:11px;color:#aaa;margin-left:auto}
+.map-container{border-radius:14px;overflow:hidden;border:1.5px solid #eee;margin-bottom:12px;height:220px}
+.attr-card{border-radius:12px;border:1.5px solid #eee;overflow:hidden;transition:border-color 0.15s}
+.attr-card:hover{border-color:#1D9E75}
+.attr-header{display:flex;align-items:center;gap:10px;padding:11px 13px;cursor:pointer;background:white}
+.attr-score{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:28px}
+.attr-score-num{font-size:16px;font-weight:700;color:#1D9E75;line-height:1}
+.attr-score-label{font-size:9px;color:#aaa}
+.attr-detail{display:none;padding:0 13px 12px;border-top:1px solid #f0f0ea;background:#fafaf7}
+.attr-detail.open{display:block}
+.audio-guide-btn{width:100%;padding:8px;border-radius:8px;border:none;background:#1D9E75;color:white;font-size:13px;cursor:pointer;margin-top:10px;font-weight:500}
+.tabs{display:flex;border-bottom:1.5px solid #eee;margin-bottom:1.2rem}
+.tab{flex:1;padding:9px;font-size:12px;font-weight:600;cursor:pointer;background:white;color:#aaa;border:none;border-bottom:2px solid transparent;transition:all 0.15s;text-align:center}
+.tab.active{color:#1D9E75;border-bottom-color:#1D9E75}
+.tab-content{display:none}
+.tab-content.active{display:block}
 </style>
 </head>
 <body>
@@ -77,37 +94,100 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
 
   <div class="body">
     <div class="section-label" id="label-lang">ენა</div>
-    <div class="lang-dropdown-wrap" style="position:relative;margin-bottom:1.2rem">
-      <div class="lang-selected" id="lang-selected" onclick="toggleLangMenu()" style="display:flex;align-items:center;gap:8px;padding:9px 13px;border-radius:10px;border:1.5px solid #e5e5e0;cursor:pointer;background:white;user-select:none">
-        <span id="lang-flag">🇬🇪</span>
+    <div class="lang-dropdown-wrap">
+      <div class="lang-selected" id="lang-selected" onclick="toggleLangMenu()">
+        <span id="lang-flag" style="font-size:18px">🇬🇪</span>
         <span id="lang-name" style="font-size:14px;color:#222;flex:1">ქართული</span>
         <span style="font-size:10px;color:#aaa">▼</span>
       </div>
-      <div id="lang-menu" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:white;border:1.5px solid #e5e5e0;border-radius:10px;overflow:hidden;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,0.08);max-height:260px;overflow-y:auto">
+      <div class="lang-menu" id="lang-menu"></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('nearby')">📍 ახლომდებარე</button>
+      <button class="tab" onclick="switchTab('search')">🔍 ძებნა</button>
+    </div>
+
+    <div id="tab-nearby" class="tab-content active">
+      <button class="locate-btn" id="locate-btn" onclick="loadNearbyAttractions()">📍 ჩემთან ახლოს სანახაობები</button>
+    </div>
+
+    <div id="tab-search" class="tab-content">
+      <div class="section-label" id="label-place">ადგილი</div>
+      <div class="search-row">
+        <input type="text" id="custom-input" placeholder="ნებისმიერი ადგილი..." />
+        <button id="ask-btn" onclick="askCustom()">კითხვა ↗</button>
       </div>
+      <div class="section-label" id="label-popular">პოპულარული ადგილები</div>
+      <div class="cards" id="cards-container"></div>
     </div>
 
-    <div class="search-row">
-      <input type="text" id="custom-input" placeholder="ნებისმიერი ადგილი..." />
-      <button id="ask-btn" onclick="askCustom()">კითხვა ↗</button>
+    <div id="map-area" style="display:none">
+      <div class="section-label">🗺️ რუკა</div>
+      <div class="map-container" id="map"></div>
     </div>
-
-    <div class="section-label" data-label="popular">პოპულარული ადგილები</div>
-    <div class="cards" id="cards-container"></div>
 
     <div id="result-area">
       <div class="placeholder-box" id="placeholder-box">
         <div class="ph-icon">🎧</div>
-        <p>აირჩიე ადგილი და მიიღე<br>პერსონალური აუდიო გიდი</p>
+        <p>აირჩიე ახლომდებარე სანახაობა<br>ან ძებნე ნებისმიერი ადგილი</p>
       </div>
     </div>
   </div>
 </div>
 
-<script>
-let lang='ka', langFull='Georgian', lastScript='', speaking=false;
-const WEBHOOK='https://tsitskabeka.app.n8n.cloud/webhook/guide';
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD5j2rdYvTOfReGLsar9CfScLegbLipAmg&callback=initMap" async defer></script>
 
+<script>
+const GUIDE_WEBHOOK = 'https://tsitskabeka.app.n8n.cloud/webhook/guide';
+const ATTRACTIONS_WEBHOOK = 'https://tsitskabeka.app.n8n.cloud/webhook/attractions';
+let lang='ka', langFull='Georgian', lastScript='', speaking=false;
+let map=null, markers=[];
+
+// ========== TABS ==========
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
+// ========== GOOGLE MAPS ==========
+function initMap(){
+  map = new google.maps.Map(document.getElementById('map'),{
+    center:{lat:41.6938,lng:44.8015},
+    zoom:13,
+    disableDefaultUI:true,
+    zoomControl:true,
+    styles:[{featureType:'poi',stylers:[{visibility:'off'}]}]
+  });
+}
+
+function showMapWithAttractions(attractions, lat, lng){
+  document.getElementById('map-area').style.display='block';
+  if(!map) return;
+  markers.forEach(m=>m.setMap(null));
+  markers=[];
+  map.setCenter({lat,lng});
+  map.setZoom(13);
+  attractions.forEach((a,i)=>{
+    if(!a.lat||!a.lng) return;
+    const marker = new google.maps.Marker({
+      position:{lat:a.lat,lng:a.lng},
+      map,
+      title:a.name,
+      label:{text:String(i+1),color:'white',fontSize:'12px',fontWeight:'bold'},
+      icon:{path:google.maps.SymbolPath.CIRCLE,scale:16,fillColor:'#1D9E75',fillOpacity:1,strokeColor:'white',strokeWeight:2}
+    });
+    const iw = new google.maps.InfoWindow({
+      content:`<div style="font-size:13px;font-weight:600;padding:4px">${a.icon||'📍'} ${a.name}</div>`
+    });
+    marker.addListener('click',()=>iw.open(map,marker));
+    markers.push(marker);
+  });
+}
+
+// ========== LANGUAGES ==========
 const LANGUAGES=[
   {code:'ka',full:'Georgian',flag:'🇬🇪',name:'ქართული'},
   {code:'en',full:'English',flag:'🇬🇧',name:'English'},
@@ -126,35 +206,29 @@ const LANGUAGES=[
   {code:'pl',full:'Polish',flag:'🇵🇱',name:'Polski'},
   {code:'nl',full:'Dutch',flag:'🇳🇱',name:'Nederlands'},
   {code:'sv',full:'Swedish',flag:'🇸🇪',name:'Svenska'},
-  {code:'da',full:'Danish',flag:'🇩🇰',name:'Dansk'},
-  {code:'fi',full:'Finnish',flag:'🇫🇮',name:'Suomi'},
-  {code:'nb',full:'Norwegian',flag:'🇳🇴',name:'Norsk'},
-  {code:'cs',full:'Czech',flag:'🇨🇿',name:'Čeština'},
-  {code:'sk',full:'Slovak',flag:'🇸🇰',name:'Slovenčina'},
-  {code:'hu',full:'Hungarian',flag:'🇭🇺',name:'Magyar'},
-  {code:'ro',full:'Romanian',flag:'🇷🇴',name:'Română'},
-  {code:'bg',full:'Bulgarian',flag:'🇧🇬',name:'Български'},
-  {code:'hr',full:'Croatian',flag:'🇭🇷',name:'Hrvatski'},
-  {code:'sr',full:'Serbian',flag:'🇷🇸',name:'Srpski'},
   {code:'uk',full:'Ukrainian',flag:'🇺🇦',name:'Українська'},
   {code:'he',full:'Hebrew',flag:'🇮🇱',name:'עברית'},
-  {code:'fa',full:'Persian',flag:'🇮🇷',name:'فارسی'},
+  {code:'ar',full:'Arabic',flag:'🇸🇦',name:'العربية'},
   {code:'id',full:'Indonesian',flag:'🇮🇩',name:'Bahasa Indonesia'},
-  {code:'ms',full:'Malay',flag:'🇲🇾',name:'Bahasa Melayu'},
   {code:'th',full:'Thai',flag:'🇹🇭',name:'ภาษาไทย'},
-  {code:'vi',full:'Vietnamese',flag:'🇻🇳',name:'Tiếng Việt'},
   {code:'el',full:'Greek',flag:'🇬🇷',name:'Ελληνικά'},
   {code:'az',full:'Azerbaijani',flag:'🇦🇿',name:'Azərbaycan'},
   {code:'am',full:'Armenian',flag:'🇦🇲',name:'Հայերեն'},
 ];
 
+const UI={
+  ka:{place:'ადგილი',popular:'პოპულარული ადგილები',search:'ნებისმიერი ადგილი...',ask:'კითხვა',tagline:'AI მოგზაურობის გიდი — ყველა ენაზე',lang_label:'ენა',nearby:'📍 ჩემთან ახლოს სანახაობები',loading_attr:'ლოკაცია და სანახაობები...',loading_guide:'AI გიდი მზადდება...',audio:'▶ ხმოვანი გიდი',stop:'■ გაჩერება',script:'🎙️ სკრიპტი',facts:'💡 ძირითადი ფაქტები',look:'👁️ ყურადღება მიაქციე',tips:'🗺️ პრაქტიკული რჩევები',nb:'☕ ახლოს',full_guide:'🎧 სრული აუდიო გიდი'},
+  en:{place:'Place',popular:'Popular Places',search:'Any place...',ask:'Search',tagline:'AI Travel Guide — Every Language',lang_label:'Language',nearby:'📍 Nearby Attractions',loading_attr:'Finding your location...',loading_guide:'AI guide preparing...',audio:'▶ Audio Guide',stop:'■ Stop',script:'🎙️ Script',facts:'💡 Key Facts',look:'👁️ Look For',tips:'🗺️ Practical Tips',nb:'☕ Nearby',full_guide:'🎧 Full Audio Guide'},
+  ru:{place:'Место',popular:'Популярные места',search:'Любое место...',ask:'Найти',tagline:'AI Аудиогид — На любом языке',lang_label:'Язык',nearby:'📍 Рядом со мной',loading_attr:'Определяем локацию...',loading_guide:'ИИ готовит гид...',audio:'▶ Аудиогид',stop:'■ Стоп',script:'🎙️ Текст',facts:'💡 Ключевые факты',look:'👁️ Обратите внимание',tips:'🗺️ Советы',nb:'☕ Рядом',full_guide:'🎧 Полный аудиогид'},
+};
+
+function t(key){ return (UI[lang]||UI['en'])[key]||UI['en'][key]||key; }
+
 const menu=document.getElementById('lang-menu');
 LANGUAGES.forEach(l=>{
   const item=document.createElement('div');
-  item.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 13px;cursor:pointer;font-size:14px;color:#222;transition:background 0.1s';
+  item.className='lang-item';
   item.innerHTML=`<span style="font-size:18px">${l.flag}</span><span>${l.name}</span><span style="font-size:11px;color:#aaa;margin-left:auto">${l.full}</span>`;
-  item.addEventListener('mouseenter',()=>item.style.background='#f5f5f0');
-  item.addEventListener('mouseleave',()=>item.style.background='white');
   item.addEventListener('click',()=>{
     lang=l.code; langFull=l.full;
     document.getElementById('lang-flag').textContent=l.flag;
@@ -165,74 +239,42 @@ LANGUAGES.forEach(l=>{
   menu.appendChild(item);
 });
 
+function toggleLangMenu(){
+  const m=document.getElementById('lang-menu');
+  m.style.display=m.style.display==='none'||m.style.display===''?'block':'none';
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.lang-dropdown-wrap')) document.getElementById('lang-menu').style.display='none';
+});
+
+function updateUI(){
+  document.getElementById('app-tagline').textContent=t('tagline');
+  document.getElementById('label-lang').textContent=t('lang_label');
+  const lp=document.getElementById('label-place'); if(lp) lp.textContent=t('place');
+  const lpo=document.getElementById('label-popular'); if(lpo) lpo.textContent=t('popular').toUpperCase();
+  const inp=document.getElementById('custom-input'); if(inp) inp.placeholder=t('search');
+  const ab=document.getElementById('ask-btn'); if(ab) ab.textContent=t('ask')+' ↗';
+  const lb=document.getElementById('locate-btn'); if(lb) lb.textContent=t('nearby');
+  renderCards();
+}
+
+// ========== CARDS ==========
 const CARDS_DATA=[
-  {id:'narikala',placeEn:'Narikala Fortress',location:'Tbilisi, Georgia',
-   translations:{
-     ka:{type:'ციხე-სიმაგრე',name:'ნარიყალას ციხე',loc:'თბილისი'},
-     en:{type:'Fortress',name:'Narikala Fortress',loc:'Tbilisi'},
-     ru:{type:'Крепость',name:'Крепость Нарикала',loc:'Тбилиси'},
-     tr:{type:'Kale',name:'Narikala Kalesi',loc:'Tiflis'},
-     de:{type:'Festung',name:'Narikala Festung',loc:'Tiflis'},
-     fr:{type:'Forteresse',name:'Forteresse de Narikala',loc:'Tbilissi'},
-     es:{type:'Fortaleza',name:'Fortaleza Narikala',loc:'Tiflis'},
-     it:{type:'Fortezza',name:'Fortezza Narikala',loc:'Tbilisi'},
-     zh:{type:'要塞',name:'纳里卡拉要塞',loc:'第比利斯'},
-     ja:{type:'要塞',name:'ナリカラ要塞',loc:'トビリシ'},
-     ar:{type:'قلعة',name:'قلعة ناريكالا',loc:'تبليسي'},
-     ko:{type:'요새',name:'나리칼라 요새',loc:'트빌리시'},
-   },icon:'🏰'},
-  {id:'museum',placeEn:'National Museum of Georgia',location:'Tbilisi, Georgia',
-   translations:{
-     ka:{type:'მუზეუმი',name:'საქართველოს ეროვნული მუზეუმი',loc:'თბილისი'},
-     en:{type:'Museum',name:'National Museum of Georgia',loc:'Tbilisi'},
-     ru:{type:'Музей',name:'Национальный музей Грузии',loc:'Тбилиси'},
-     tr:{type:'Müze',name:'Gürcistan Ulusal Müzesi',loc:'Tiflis'},
-     de:{type:'Museum',name:'Nationalmuseum Georgiens',loc:'Tiflis'},
-     fr:{type:'Musée',name:'Musée national de Géorgie',loc:'Tbilissi'},
-     es:{type:'Museo',name:'Museo Nacional de Georgia',loc:'Tiflis'},
-     it:{type:'Museo',name:'Museo Nazionale della Georgia',loc:'Tbilisi'},
-     zh:{type:'博物馆',name:'格鲁吉亚国家博物馆',loc:'第比利斯'},
-     ja:{type:'博物館',name:'グルジア国立博物館',loc:'トビリシ'},
-     ar:{type:'متحف',name:'المتحف الوطني لجورجيا',loc:'تبليسي'},
-     ko:{type:'박물관',name:'조지아 국립박물관',loc:'트빌리시'},
-   },icon:'🏛️'},
-  {id:'jvari',placeEn:'Jvari Monastery',location:'Mtskheta, Georgia',
-   translations:{
-     ka:{type:'მონასტერი',name:'ჯვრის მონასტერი',loc:'მცხეთა'},
-     en:{type:'Monastery',name:'Jvari Monastery',loc:'Mtskheta'},
-     ru:{type:'Монастырь',name:'Монастырь Джвари',loc:'Мцхета'},
-     tr:{type:'Manastır',name:'Jvari Manastırı',loc:'Mtskheta'},
-     de:{type:'Kloster',name:'Kloster Dschvari',loc:'Mzcheta'},
-     fr:{type:'Monastère',name:'Monastère de Jvari',loc:'Mtskheta'},
-     es:{type:'Monasterio',name:'Monasterio de Jvari',loc:'Mtskheta'},
-     it:{type:'Monastero',name:'Monastero di Jvari',loc:'Mtskheta'},
-     zh:{type:'修道院',name:'姆茨赫塔十字架修道院',loc:'姆茨赫塔'},
-     ja:{type:'修道院',name:'ジュワリ修道院',loc:'ムツヘタ'},
-     ar:{type:'دير',name:'دير جفاري',loc:'متسخيتا'},
-     ko:{type:'수도원',name:'즈바리 수도원',loc:'므츠헤타'},
-   },icon:'⛪'},
-  {id:'sighnaghi',placeEn:'Sighnaghi old town',location:'Kakheti, Georgia',
-   translations:{
-     ka:{type:'ისტორიული ქალაქი',name:'სიღნაღი',loc:'კახეთი'},
-     en:{type:'Historic Town',name:'Sighnaghi',loc:'Kakheti'},
-     ru:{type:'Исторический город',name:'Сигнахи',loc:'Кахетия'},
-     tr:{type:'Tarihi Şehir',name:'Sighnaghi',loc:'Kakheti'},
-     de:{type:'Historische Stadt',name:'Signagi',loc:'Kachetien'},
-     fr:{type:'Ville historique',name:'Sighnaghi',loc:'Kakhétie'},
-     es:{type:'Ciudad histórica',name:'Sighnaghi',loc:'Kakheti'},
-     it:{type:'Città storica',name:'Sighnaghi',loc:'Kakheti'},
-     zh:{type:'历史古城',name:'锡格纳吉',loc:'卡赫季'},
-     ja:{type:'歴史的な町',name:'シグナギ',loc:'カヘティ'},
-     ar:{type:'مدينة تاريخية',name:'سيغناغي',loc:'كاختي'},
-     ko:{type:'역사적 도시',name:'시그나기',loc:'카헤티'},
-   },icon:'🏘️'},
+  {placeEn:'Narikala Fortress',location:'Tbilisi, Georgia',icon:'🏰',
+   tr:{ka:{type:'ციხე-სიმაგრე',name:'ნარიყალას ციხე',loc:'თბილისი'},en:{type:'Fortress',name:'Narikala Fortress',loc:'Tbilisi'},ru:{type:'Крепость',name:'Нарикала',loc:'Тбилиси'}}},
+  {placeEn:'National Museum of Georgia',location:'Tbilisi, Georgia',icon:'🏛️',
+   tr:{ka:{type:'მუზეუმი',name:'ეროვნული მუზეუმი',loc:'თბილისი'},en:{type:'Museum',name:'National Museum',loc:'Tbilisi'},ru:{type:'Музей',name:'Нац. музей',loc:'Тбилиси'}}},
+  {placeEn:'Jvari Monastery',location:'Mtskheta, Georgia',icon:'⛪',
+   tr:{ka:{type:'მონასტერი',name:'ჯვრის მონასტერი',loc:'მცხეთა'},en:{type:'Monastery',name:'Jvari Monastery',loc:'Mtskheta'},ru:{type:'Монастырь',name:'Монастырь Джвари',loc:'Мцхета'}}},
+  {placeEn:'Sighnaghi old town',location:'Kakheti, Georgia',icon:'🏘️',
+   tr:{ka:{type:'ისტ. ქალაქი',name:'სიღნაღი',loc:'კახეთი'},en:{type:'Historic Town',name:'Sighnaghi',loc:'Kakheti'},ru:{type:'Ист. город',name:'Сигнахи',loc:'Кахетия'}}},
 ];
 
 function renderCards(){
-  const t = lang;
-  const container = document.getElementById('cards-container');
-  container.innerHTML = CARDS_DATA.map(card=>{
-    const tr = card.translations[t] || card.translations['en'];
+  const container=document.getElementById('cards-container');
+  if(!container) return;
+  container.innerHTML=CARDS_DATA.map(card=>{
+    const tr=card.tr[lang]||card.tr['en'];
     return `<div class="card" onclick="selectPlace(this,'${card.placeEn}','${card.location}','${tr.name}')">
       <div class="card-icon">${card.icon}</div>
       <div class="card-info">
@@ -244,52 +286,99 @@ function renderCards(){
   }).join('');
 }
 
-const UI_TRANSLATIONS={
-  ka:{place:'ადგილი',popular:'პოპულარული ადგილები',search:'ნებისმიერი ადგილი...',ask:'კითხვა',placeholder_title:'🎧 აირჩიე ადგილი',placeholder_sub:'მიიღე პერსონალური აუდიო გიდი',loading:'AI გიდი მზადდება...',audio:'▶ ხმოვანი გიდი',stop:'■ გაჩერება',script:'🎙️ სკრიპტი',facts:'💡 ძირითადი ფაქტები',look:'👁️ ყურადღება მიაქციე',tips:'🗺️ პრაქტიკული რჩევები',nearby:'☕ ახლოს',lang_label:'ენა',tagline:'AI მოგზაურობის გიდი — ყველა ენაზე'},
-  en:{place:'Place',popular:'Popular Places',search:'Any place...',ask:'Search',placeholder_title:'🎧 Choose a place',placeholder_sub:'Get your personal audio guide',loading:'AI guide is preparing...',audio:'▶ Audio Guide',stop:'■ Stop',script:'🎙️ Script',facts:'💡 Key Facts',look:'👁️ Look For',tips:'🗺️ Practical Tips',nearby:'☕ Nearby',lang_label:'Language',tagline:'AI Travel Guide — Every Language'},
-  ru:{place:'Место',popular:'Популярные места',search:'Любое место...',ask:'Найти',placeholder_title:'🎧 Выберите место',placeholder_sub:'Получите персональный аудиогид',loading:'ИИ готовит гид...',audio:'▶ Аудиогид',stop:'■ Стоп',script:'🎙️ Текст',facts:'💡 Ключевые факты',look:'👁️ Обратите внимание',tips:'🗺️ Практические советы',nearby:'☕ Рядом',lang_label:'Язык',tagline:'AI Аудиогид — На любом языке'},
-  tr:{place:'Yer',popular:'Popüler Yerler',search:'Herhangi bir yer...',ask:'Ara',placeholder_title:'🎧 Bir yer seçin',placeholder_sub:'Kişisel sesli rehberinizi alın',loading:'Yapay zeka rehber hazırlıyor...',audio:'▶ Sesli Rehber',stop:'■ Dur',script:'🎙️ Metin',facts:'💡 Temel Bilgiler',look:'👁️ Dikkat Et',tips:'🗺️ Pratik İpuçları',nearby:'☕ Yakın',lang_label:'Dil',tagline:'AI Sesli Rehber — Her Dilde'},
-  de:{place:'Ort',popular:'Beliebte Orte',search:'Beliebiger Ort...',ask:'Suchen',placeholder_title:'🎧 Ort auswählen',placeholder_sub:'Persönlichen Audioguide erhalten',loading:'KI-Guide wird vorbereitet...',audio:'▶ Audioguide',stop:'■ Stopp',script:'🎙️ Skript',facts:'💡 Schlüsselfakten',look:'👁️ Achten Sie auf',tips:'🗺️ Praktische Tipps',nearby:'☕ In der Nähe',lang_label:'Sprache',tagline:'KI Reiseführer — Jede Sprache'},
-  fr:{place:'Lieu',popular:'Lieux populaires',search:'Nimporte quel lieu...',ask:'Chercher',placeholder_title:'🎧 Choisissez un lieu',placeholder_sub:'Obtenez votre guide audio personnel',loading:'Le guide IA se prépare...',audio:'▶ Guide audio',stop:'■ Arrêter',script:'🎙️ Script',facts:'💡 Faits clés',look:'👁️ À observer',tips:'🗺️ Conseils pratiques',nearby:'☕ À proximité',lang_label:'Langue',tagline:'Guide Audio IA — Toutes les langues'},
-  es:{place:'Lugar',popular:'Lugares populares',search:'Cualquier lugar...',ask:'Buscar',placeholder_title:'🎧 Elige un lugar',placeholder_sub:'Obtén tu guía de audio personal',loading:'La guía IA se prepara...',audio:'▶ Guía de audio',stop:'■ Parar',script:'🎙️ Guión',facts:'💡 Datos clave',look:'👁️ Fíjate en',tips:'🗺️ Consejos prácticos',nearby:'☕ Cerca',lang_label:'Idioma',tagline:'Guía de Audio IA — Todos los idiomas'},
-  it:{place:'Luogo',popular:'Luoghi popolari',search:'Qualsiasi luogo...',ask:'Cerca',placeholder_title:'🎧 Scegli un luogo',placeholder_sub:'Ottieni la tua guida audio personale',loading:'La guida AI si prepara...',audio:'▶ Guida audio',stop:'■ Ferma',script:'🎙️ Copione',facts:'💡 Fatti chiave',look:'👁️ Osserva',tips:'🗺️ Consigli pratici',nearby:'☕ Nelle vicinanze',lang_label:'Lingua',tagline:'Guida Audio AI — Ogni lingua'},
-  zh:{place:'地点',popular:'热门地点',search:'任何地方...',ask:'搜索',placeholder_title:'🎧 选择地点',placeholder_sub:'获取您的个人语音导览',loading:'AI导游正在准备...',audio:'▶ 语音导览',stop:'■ 停止',script:'🎙️ 脚本',facts:'💡 关键事实',look:'👁️ 注意观察',tips:'🗺️ 实用提示',nearby:'☕ 附近',lang_label:'语言',tagline:'AI旅游导览 — 所有语言'},
-  ja:{place:'場所',popular:'人気スポット',search:'どんな場所でも...',ask:'検索',placeholder_title:'🎧 場所を選択',placeholder_sub:'パーソナル音声ガイドを取得',loading:'AIガイドを準備中...',audio:'▶ 音声ガイド',stop:'■ 停止',script:'🎙️ スクリプト',facts:'💡 主な事実',look:'👁️ 注目ポイント',tips:'🗺️ 実用的なヒント',nearby:'☕ 近くのスポット',lang_label:'言語',tagline:'AI旅行ガイド — すべての言語'},
-  ar:{place:'المكان',popular:'الأماكن الشهيرة',search:'أي مكان...',ask:'بحث',placeholder_title:'🎧 اختر مكاناً',placeholder_sub:'احصل على دليلك الصوتي الشخصي',loading:'الذكاء الاصطناعي يُعد الدليل...',audio:'▶ الدليل الصوتي',stop:'■ إيقاف',script:'🎙️ النص',facts:'💡 حقائق رئيسية',look:'👁️ انتبه إلى',tips:'🗺️ نصائح عملية',nearby:'☕ بالقرب',lang_label:'اللغة',tagline:'دليل سياحي بالذكاء الاصطناعي — كل اللغات'},
-  ko:{place:'장소',popular:'인기 장소',search:'어느 장소든...',ask:'검색',placeholder_title:'🎧 장소를 선택하세요',placeholder_sub:'개인 오디오 가이드 받기',loading:'AI 가이드 준비 중...',audio:'▶ 오디오 가이드',stop:'■ 중지',script:'🎙️ 스크립트',facts:'💡 주요 사실',look:'👁️ 주목할 점',tips:'🗺️ 실용적인 팁',nearby:'☕ 근처',lang_label:'언어',tagline:'AI 여행 가이드 — 모든 언어'},
-};
+// ========== NEARBY ATTRACTIONS ==========
+async function loadNearbyAttractions(){
+  const btn=document.getElementById('locate-btn');
+  const area=document.getElementById('result-area');
+  btn.disabled=true;
+  area.innerHTML=`<div style="padding:24px;text-align:center"><div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><p style="font-size:12px;color:#bbb;margin-top:10px">${t('loading_attr')}</p></div>`;
 
-function getT(){ return UI_TRANSLATIONS[lang] || UI_TRANSLATIONS['en']; }
+  try {
+    const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:10000}));
+    const {latitude:lat,longitude:lng}=pos.coords;
 
-function updateUI(){
-  const t=getT();
-  const placeLbl=document.querySelector('[data-label="place"]');
-  const popLbl=document.querySelector('[data-label="popular"]');
-  const inp=document.getElementById('custom-input');
-  const askBtn=document.getElementById('ask-btn');
-  if(placeLbl) placeLbl.textContent=t.place.toUpperCase();
-  if(popLbl) popLbl.textContent=t.popular.toUpperCase();
-  if(inp) inp.placeholder=t.search;
-  if(askBtn) askBtn.textContent=t.ask+' ↗';
-  const tagline=document.getElementById('app-tagline');
-  if(tagline) tagline.textContent=t.tagline;
-  const labelLang=document.getElementById('label-lang');
-  if(labelLang) labelLang.textContent=t.lang_label||'Language';
-  const labelPlace=document.getElementById('label-place');
-  if(labelPlace) labelPlace.textContent=t.place;
-  renderCards();
-  const ph=document.getElementById('placeholder-box');
-  if(ph) ph.innerHTML=`<div class="ph-icon">🎧</div><p>${t.placeholder_title.replace('🎧 ','')}<br>${t.placeholder_sub}</p>`;
+    const geo=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,{headers:{'Accept-Language':'en'}});
+    const geoData=await geo.json();
+    const city=geoData.address.city||geoData.address.town||geoData.address.village||geoData.address.county||'Unknown';
+    const country=geoData.address.country||'';
+
+    if(map){ map.setCenter({lat,lng}); map.setZoom(13); }
+    document.getElementById('map-area').style.display='block';
+
+    const res=await fetch(ATTRACTIONS_WEBHOOK,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({city,country,lat,lng,language:langFull})
+    });
+    const raw=await res.text();
+    const cleaned=raw.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim();
+    const data=JSON.parse(cleaned);
+
+    renderAttractions(data.attractions||[],city,country,lat,lng);
+  } catch(e){
+    area.innerHTML=`<div class="placeholder-box"><div class="ph-icon">⚠️</div><p>${e.message}</p></div>`;
+  }
+  btn.disabled=false;
 }
 
-function toggleLangMenu(){
-  const m=document.getElementById('lang-menu');
-  m.style.display=m.style.display==='none'?'block':'none';
-}
-document.addEventListener('click',e=>{
-  if(!e.target.closest('.lang-dropdown-wrap')) document.getElementById('lang-menu').style.display='none';
-});
+function renderAttractions(attractions,city,country,lat,lng){
+  const typeIcons={landmark:'🏛️',museum:'🎨',nature:'🌿',religious:'⛪',historic:'🏰'};
 
+  if(map && lat && lng){
+    markers.forEach(m=>m.setMap(null)); markers=[];
+    map.setCenter({lat,lng}); map.setZoom(13);
+    new google.maps.Marker({
+      position:{lat,lng},map,
+      icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:'#185FA5',fillOpacity:1,strokeColor:'white',strokeWeight:2},
+      title:'You are here'
+    });
+  }
+
+  const cards=attractions.map((a,i)=>`
+    <div class="attr-card">
+      <div class="attr-header" onclick="toggleAttr(${i})">
+        <div class="card-icon">${a.icon||typeIcons[a.type]||'📍'}</div>
+        <div style="flex:1">
+          <div class="card-type">${a.type||''} · ⏱ ${a.visit_duration||''}</div>
+          <div class="card-name">${a.name}</div>
+          <div style="font-size:12px;color:#666;margin-top:3px;line-height:1.4">${a.outside_desc||''}</div>
+        </div>
+        <div class="attr-score">
+          <div class="attr-score-num">${a.appeal_score||''}</div>
+          <div class="attr-score-label">/ 10</div>
+        </div>
+      </div>
+      <div class="attr-detail" id="attr-${i}">
+        <p style="font-size:13px;color:#444;line-height:1.6;margin:10px 0 8px">${a.inside_desc||''}</p>
+        <div class="chips">
+          <span class="chip chip-amber">⭐ ${a.best_time||''}</span>
+          <span class="chip chip-green">⏱ ${a.visit_duration||''}</span>
+        </div>
+        <button class="audio-guide-btn" onclick="event.stopPropagation();startGuide('${a.name.replace(/'/g,"\\'")}','${city}, ${country}','${a.name.replace(/'/g,"\\'")}')">
+          ${t('full_guide')}
+        </button>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('result-area').innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.5px">📍 ${city}, ${country}</span>
+      <span style="font-size:11px;color:#bbb">${attractions.length} ადგილი</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">${cards}</div>`;
+}
+
+function toggleAttr(i){
+  const d=document.getElementById('attr-'+i);
+  d.classList.toggle('open');
+}
+
+function startGuide(placeEn,location,placeDisplay){
+  document.querySelector('[onclick="switchTab(\'search\')"]').click();
+  fetchInfo(placeEn,location,placeDisplay);
+}
+
+// ========== AUDIO GUIDE ==========
 function selectPlace(el,placeEn,location,placeKa){
   document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
@@ -305,78 +394,20 @@ function askCustom(){
 function showLoading(){
   document.getElementById('result-area').innerHTML=`
     <div style="padding:24px;text-align:center">
-      <div class="loading" style="justify-content:center">
-        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-      </div>
-      <p style="font-size:12px;color:#bbb;margin-top:10px">${getT().loading}</p>
+      <div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <p style="font-size:12px;color:#bbb;margin-top:10px">${t('loading_guide')}</p>
     </div>`;
-}
-
-function renderResult(data){
-  const secs=data.estimated_duration_seconds||0;
-  const mins=Math.round(secs/60);
-  const scriptHtml=(data.script||'')
-    .split(/\n\n+/)
-    .filter(p=>p.trim())
-    .map(p=>{
-      const clean=p.trim().replace(/\[PAUSE\]/g,'<span class="pause-tag">⏸</span>');
-      return `<p style="margin-bottom:13px">${clean}</p>`;
-    }).join('');
-  const keyFacts=(data.key_facts||[]).map(f=>`<span class="chip chip-green">💡 ${f}</span>`).join('');
-  const tipIcons=['🕐','📸','☕','👗','⏱️'];
-  const tips=(data.tips||[]).map((t,i)=>`<div class="list-item"><span style="font-size:14px;flex-shrink:0">${tipIcons[i%tipIcons.length]}</span><span>${t}</span></div>`).join('');
-  const lookFor=(data.look_for||[]).map(l=>`<span class="chip chip-blue">👁 ${l}</span>`).join('');
-  const nearby=(data.nearby_suggestions||[]).map(n=>`<span class="chip chip-amber">📍 ${n}</span>`).join('');
-
-  document.getElementById('result-area').innerHTML=`
-    <div class="result-card">
-      <div class="result-title-bar">
-        <div class="result-title">🎧 ${data.title||'Audio Guide'}</div>
-        ${mins?`<div class="result-duration">⏱ ~${mins} წუთი</div>`:''}
-      </div>
-      <div class="result-body">
-        <div class="section-block">
-          <div class="section-head">${getT().script}</div>
-          <div class="script-text">${scriptHtml}</div>
-        </div>
-        ${keyFacts?`<div class="section-block"><div class="section-head">${getT().facts}</div><div class="chips">${keyFacts}</div></div>`:''}
-        ${lookFor?`<div class="section-block"><div class="section-head">${getT().look}</div><div class="chips">${lookFor}</div></div>`:''}
-        ${tips?`<div class="section-block"><div class="section-head">${getT().tips}</div><div class="list-items">${tips}</div></div>`:''}
-        ${nearby?`<div class="section-block"><div class="section-head">${getT().nearby}</div><div class="chips">${nearby}</div></div>`:''}
-      </div>
-      <div class="audio-bar">
-        <button class="speak-btn" id="speak-btn">${getT().audio}</button>
-        ${mins?`<span class="duration-badge">~${mins} წთ</span>`:''}
-      </div>
-    </div>`;
-
-  document.getElementById('speak-btn').addEventListener('click',toggleSpeak);
-}
-
-function toggleSpeak(){
-  if(!lastScript) return;
-  const btn=document.getElementById('speak-btn');
-  if(speaking){
-    speechSynthesis.cancel(); speaking=false;
-    btn.textContent=getT().audio; return;
-  }
-  const clean=lastScript.replace(/\[PAUSE\]/g,'... ');
-  const u=new SpeechSynthesisUtterance(clean);
-  const lm={ka:'ka-GE',en:'en-US',ru:'ru-RU',tr:'tr-TR',de:'de-DE',fr:'fr-FR'};
-  u.lang=lm[lang]||'en-US';
-  u.onend=()=>{speaking=false; const b=document.getElementById('speak-btn'); if(b) b.textContent=getT().audio;};
-  speechSynthesis.speak(u); speaking=true;
-  btn.textContent=getT().stop;
 }
 
 async function fetchInfo(placeEn,location,placeDisplay){
   showLoading();
-  document.getElementById('ask-btn').disabled=true;
+  const btn=document.getElementById('ask-btn');
+  if(btn) btn.disabled=true;
   try {
-    const res=await fetch(WEBHOOK,{
+    const res=await fetch(GUIDE_WEBHOOK,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({place:placeEn,location:location,language:langFull,visitor_type:'tourist',duration:5})
+      body:JSON.stringify({place:placeEn,location,language:langFull,visitor_type:'tourist',duration:5})
     });
     const raw=await res.text();
     let data;
@@ -387,12 +418,59 @@ async function fetchInfo(placeEn,location,placeDisplay){
       data={title:placeDisplay,script:raw,key_facts:[],tips:[],look_for:[],nearby_suggestions:[]};
     }
     lastScript=data.script||raw;
-    renderResult(data);
+    renderGuide(data);
   } catch(e){
-    document.getElementById('result-area').innerHTML=`<div class="placeholder-box" id="placeholder-box"><div class="ph-icon">⚠️</div><p>შეცდომა: ${e.message}</p></div>`;
+    document.getElementById('result-area').innerHTML=`<div class="placeholder-box"><div class="ph-icon">⚠️</div><p>${e.message}</p></div>`;
   }
-  document.getElementById('ask-btn').disabled=false;
+  if(btn) btn.disabled=false;
 }
+
+function renderGuide(data){
+  const secs=data.estimated_duration_seconds||0;
+  const mins=Math.round(secs/60);
+  const scriptHtml=(data.script||'').split(/\n\n+/).filter(p=>p.trim()).map(p=>{
+    const clean=p.trim().replace(/\[PAUSE\]/g,'<span class="pause-tag">⏸</span>');
+    return `<p style="margin-bottom:13px">${clean}</p>`;
+  }).join('');
+  const keyFacts=(data.key_facts||[]).map(f=>`<span class="chip chip-green">💡 ${f}</span>`).join('');
+  const tipIcons=['🕐','📸','☕','👗','⏱️'];
+  const tips=(data.tips||[]).map((tp,i)=>`<div class="list-item"><span style="font-size:14px;flex-shrink:0">${tipIcons[i%tipIcons.length]}</span><span>${tp}</span></div>`).join('');
+  const lookFor=(data.look_for||[]).map(l=>`<span class="chip chip-blue">👁 ${l}</span>`).join('');
+  const nearby=(data.nearby_suggestions||[]).map(n=>`<span class="chip chip-amber">📍 ${n}</span>`).join('');
+
+  document.getElementById('result-area').innerHTML=`
+    <div class="result-card">
+      <div class="result-title-bar">
+        <div class="result-title">🎧 ${data.title||'Audio Guide'}</div>
+        ${mins?`<div class="result-duration">⏱ ~${mins} წუთი</div>`:''}
+      </div>
+      <div class="result-body">
+        <div><div class="section-head">${t('script')}</div><div class="script-text">${scriptHtml}</div></div>
+        ${keyFacts?`<div><div class="section-head">${t('facts')}</div><div class="chips">${keyFacts}</div></div>`:''}
+        ${lookFor?`<div><div class="section-head">${t('look')}</div><div class="chips">${lookFor}</div></div>`:''}
+        ${tips?`<div><div class="section-head">${t('tips')}</div><div class="list-items">${tips}</div></div>`:''}
+        ${nearby?`<div><div class="section-head">${t('nb')}</div><div class="chips">${nearby}</div></div>`:''}
+      </div>
+      <div class="audio-bar">
+        <button class="speak-btn" id="speak-btn">${t('audio')}</button>
+        ${mins?`<span class="duration-badge">~${mins} წთ</span>`:''}
+      </div>
+    </div>`;
+  document.getElementById('speak-btn').addEventListener('click',toggleSpeak);
+}
+
+function toggleSpeak(){
+  if(!lastScript) return;
+  const btn=document.getElementById('speak-btn');
+  if(speaking){speechSynthesis.cancel();speaking=false;btn.textContent=t('audio');return;}
+  const u=new SpeechSynthesisUtterance(lastScript.replace(/\[PAUSE\]/g,'... '));
+  const lm={ka:'ka-GE',en:'en-US',ru:'ru-RU',tr:'tr-TR',de:'de-DE',fr:'fr-FR',es:'es-ES',it:'it-IT',zh:'zh-CN',ja:'ja-JP',ko:'ko-KR',ar:'ar-SA'};
+  u.lang=lm[lang]||'en-US';
+  u.onend=()=>{speaking=false;const b=document.getElementById('speak-btn');if(b)b.textContent=t('audio');};
+  speechSynthesis.speak(u);speaking=true;
+  btn.textContent=t('stop');
+}
+
 renderCards();
 </script>
 </body>
