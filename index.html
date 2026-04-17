@@ -109,7 +109,18 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
     </div>
 
     <div id="tab-nearby" class="tab-content active">
-      <button class="locate-btn" id="locate-btn" onclick="loadNearbyAttractions()">📍 ჩემთან ახლოს სანახაობები</button>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input type="text" id="city-input" placeholder="ქალაქი (მაგ: თბილისი)..." 
+          style="flex:1;padding:9px 13px;border-radius:10px;border:1.5px solid #e5e5e0;font-size:14px;color:#222"/>
+        <button onclick="loadNearbyAttractions()" id="locate-btn"
+          style="padding:9px 14px;border-radius:10px;border:none;background:#0F6E56;color:white;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap">
+          📍 ძებნა
+        </button>
+      </div>
+      <button onclick="autoDetectCity()" id="auto-btn"
+        style="width:100%;padding:9px;border-radius:10px;border:1.5px solid #e5e5e0;background:white;color:#555;font-size:13px;cursor:pointer;margin-bottom:1.2rem">
+        🎯 ავტო-აღმოჩენა GPS-ით
+      </button>
     </div>
 
     <div id="tab-search" class="tab-content">
@@ -288,19 +299,25 @@ function renderCards(){
 
 // ========== NEARBY ATTRACTIONS ==========
 async function loadNearbyAttractions(){
+  const cityVal = document.getElementById('city-input').value.trim();
+  if(!cityVal){ alert('ჩაწერე ქალაქის სახელი'); return; }
   const btn=document.getElementById('locate-btn');
   const area=document.getElementById('result-area');
   btn.disabled=true;
   area.innerHTML=`<div style="padding:24px;text-align:center"><div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><p style="font-size:12px;color:#bbb;margin-top:10px">${t('loading_attr')}</p></div>`;
 
   try {
-    const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:10000}));
-    const {latitude:lat,longitude:lng}=pos.coords;
-
-    const geo=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,{headers:{'Accept-Language':'en'}});
+    // Geocode the entered city
+    const geo=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityVal)}&format=json&limit=1`,{headers:{'Accept-Language':'en'}});
     const geoData=await geo.json();
-    const city=geoData.address.city||geoData.address.town||geoData.address.village||geoData.address.county||'Unknown';
-    const country=geoData.address.country||'';
+    let lat=41.6938, lng=44.8015, city=cityVal, country='';
+    if(geoData.length>0){
+      lat=parseFloat(geoData[0].lat);
+      lng=parseFloat(geoData[0].lon);
+      const parts=geoData[0].display_name.split(',');
+      city=parts[0].trim();
+      country=parts[parts.length-1].trim();
+    }
 
     if(map){ map.setCenter({lat,lng}); map.setZoom(13); }
     document.getElementById('map-area').style.display='block';
@@ -319,6 +336,22 @@ async function loadNearbyAttractions(){
     area.innerHTML=`<div class="placeholder-box"><div class="ph-icon">⚠️</div><p>${e.message}</p></div>`;
   }
   btn.disabled=false;
+}
+
+async function autoDetectCity(){
+  const btn=document.getElementById('auto-btn');
+  btn.disabled=true; btn.textContent='🔄 ძებნა...';
+  try {
+    const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:10000,enableHighAccuracy:true}));
+    const {latitude:lat,longitude:lng}=pos.coords;
+    const geo=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,{headers:{'Accept-Language':'en'}});
+    const geoData=await geo.json();
+    const city=geoData.address.city||geoData.address.town||geoData.address.village||geoData.address.county||'';
+    if(city) document.getElementById('city-input').value=city;
+  } catch(e){
+    alert('GPS ვერ მოიძებნა: '+e.message);
+  }
+  btn.disabled=false; btn.textContent='🎯 ავტო-აღმოჩენა GPS-ით';
 }
 
 function renderAttractions(attractions,city,country,lat,lng){
