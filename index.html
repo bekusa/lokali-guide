@@ -106,25 +106,6 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
       <div class="lang-menu" id="lang-menu"></div>
     </div>
 
-    <div style="display:flex;gap:10px;margin-bottom:1.2rem">
-      <div style="flex:1">
-        <div class="section-label" id="label-visitor">ჩემი ინტერესი</div>
-        <div style="position:relative" id="visitor-dropdown-wrap">
-          <div id="visitor-selected" onclick="toggleVisitorMenu()" style="display:flex;align-items:center;gap:7px;padding:9px 13px;border-radius:10px;border:1.5px solid #e5e5e0;cursor:pointer;background:white;user-select:none">
-            <span id="visitor-icon" style="font-size:15px">🧳</span>
-            <span id="visitor-name" style="font-size:13px;color:#222;flex:1">პირველი ვიზიტი</span>
-            <span style="font-size:10px;color:#aaa">▼</span>
-          </div>
-          <div id="visitor-menu" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:white;border:1.5px solid #e5e5e0;border-radius:10px;overflow:hidden;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,0.08);max-height:220px;overflow-y:auto"></div>
-        </div>
-      </div>
-      <div style="flex:1">
-        <div class="section-label" id="label-duration">გიდის ხანგრძლივობა</div>
-        <div id="dur-buttons" style="display:flex;gap:0;border:1.5px solid #e5e5e0;border-radius:10px;overflow:hidden">
-        </div>
-      </div>
-    </div>
-
               <div class="tabs" style="margin-bottom:1.2rem">
       <button class="tab active" id="tab-btn-nearby" onclick="switchTab('nearby')">📍 ადგილები</button>
       <button class="tab" id="tab-btn-guide" onclick="switchTab('guide')">🎧 გიდი</button>
@@ -308,8 +289,6 @@ function updateUI(){
   if(el('tab-btn-guide')) el('tab-btn-guide').textContent=t('tab_guide');
   if(el('ph-nearby-text')) el('ph-nearby-text').innerHTML=t('ph_nearby');
   if(el('ph-guide-text')) el('ph-guide-text').innerHTML=t('ph_guide');
-  renderVisitorTypes();
-  renderDurationButtons();
   renderCards();
   const _tbn=document.getElementById('tab-btn-nearby'); if(_tbn) _tbn.textContent=t('tab_nearby')||'📍 ადგილები';
   const _tbg=document.getElementById('tab-btn-guide'); if(_tbg) _tbg.textContent=t('tab_guide')||'🎧 გიდი';
@@ -636,6 +615,31 @@ function showLoading(placeDisplay){
   }
 }
 
+async function fetchInfoWithParams(placeEn,location,placeDisplay,visitorType,duration){
+  const btn=document.getElementById('ask-btn');
+  if(btn) btn.disabled=true;
+  try {
+    const res=await fetch(GUIDE_WEBHOOK,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({place:placeEn,location,language:langFull,visitor_type:visitorType||'tourist',duration:duration||5})
+    });
+    const raw=await res.text();
+    let data;
+    try {
+      const cleaned=raw.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim();
+      data=JSON.parse(cleaned);
+    } catch(e){
+      data={title:placeDisplay,script:raw,key_facts:[],tips:[],look_for:[],nearby_suggestions:[]};
+    }
+    lastScript=data.script||raw;
+    renderGuide(data);
+  } catch(e){
+    document.getElementById('result-area').innerHTML='<div class="placeholder-box"><div class="ph-icon">⚠️</div><p>'+e.message+'</p></div>';
+  }
+  if(btn) btn.disabled=false;
+}
+
 async function fetchInfo(placeEn,location,placeDisplay){
   const btn=document.getElementById('ask-btn');
   if(btn) btn.disabled=true;
@@ -697,12 +701,76 @@ function renderGuide(data){
   const spk=document.getElementById('speak-btn'); if(spk) spk.addEventListener('click',toggleSpeak);
 }
 
-window._startGuide = function(placeEn, location, placeDisplay){
+window._startGuideWithParams = function(placeEn, location, placeDisplay, visitorType, duration){
   infoWindows.forEach(w=>w.close());
   switchTab('guide');
   document.querySelector('.app').scrollIntoView({behavior:'smooth',block:'start'});
   document.getElementById('result-area').innerHTML='<div style="padding:24px;text-align:center"><div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><p style="font-size:12px;color:#bbb;margin-top:10px">'+t('loading_guide')+'</p></div>';
-  fetchInfo(placeEn, location, placeDisplay);
+  fetchInfoWithParams(placeEn, location, placeDisplay, visitorType, duration);
+};
+
+window._startGuide = function(placeEn, location, placeDisplay){
+  window._startGuideWithParams(placeEn, location, placeDisplay, 'first-time tourist', 3);
+};
+
+const cardVisitorTypes = {};
+const cardDurations = {};
+
+function toggleCardVisitor(i){
+  const menu = document.getElementById('card-visitor-menu-'+i);
+  if(!menu) return;
+  if(menu.style.display !== 'none'){ menu.style.display='none'; return; }
+  menu.innerHTML = VISITOR_TYPES.map(v=>{
+    const label = v.labels[lang]||v.labels['en'];
+    const isActive = (cardVisitorTypes[i]||'first-time tourist') === v.value;
+    const item = document.createElement('div');
+    item.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;font-size:12px;background:'+(isActive?'#f0faf6':'white');
+    item.innerHTML='<span style="font-size:14px">'+v.icon+'</span><span style="color:#222">'+label+'</span>';
+    item.addEventListener('mouseenter',()=>item.style.background='#f5f5f0');
+    item.addEventListener('mouseleave',()=>item.style.background=isActive?'#f0faf6':'white');
+    item.addEventListener('click',()=>{
+      cardVisitorTypes[i]=v.value;
+      document.getElementById('card-visitor-icon-'+i).textContent=v.icon;
+      document.getElementById('card-visitor-name-'+i).textContent=label;
+      menu.style.display='none';
+    });
+    return item.outerHTML;
+  }).join('');
+  // re-attach events
+  menu.querySelectorAll('div').forEach((el,vi)=>{
+    const v=VISITOR_TYPES[vi];
+    el.addEventListener('click',()=>{
+      cardVisitorTypes[i]=v.value;
+      document.getElementById('card-visitor-icon-'+i).textContent=v.icon;
+      document.getElementById('card-visitor-name-'+i).textContent=v.labels[lang]||v.labels['en'];
+      menu.style.display='none';
+    });
+  });
+  menu.style.display='block';
+}
+
+function setCardDuration(i, btn){
+  const container = document.getElementById('card-dur-'+i);
+  if(!container) return;
+  container.querySelectorAll('.card-dur-btn').forEach(b=>{
+    b.style.background='white'; b.style.color='#555';
+  });
+  btn.style.background='#1D9E75'; btn.style.color='white';
+  cardDurations[i] = parseInt(btn.dataset.dur);
+}
+
+document.addEventListener('click', e=>{
+  if(!e.target.closest('[id^="card-visitor-wrap-"]')){
+    document.querySelectorAll('[id^="card-visitor-menu-"]').forEach(m=>m.style.display='none');
+  }
+});
+
+window._startGuideByCard = function(i){
+  const a = currentAttractions[i];
+  if(!a) return;
+  const visitorType = cardVisitorTypes[i] || 'first-time tourist';
+  const duration = cardDurations[i] || 3;
+  window._startGuideWithParams(a.name, currentCity+', '+currentCountry, a.name, visitorType, duration);
 };
 
 window._startGuideById = function(i){
