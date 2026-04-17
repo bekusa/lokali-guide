@@ -650,6 +650,21 @@ function showLoading(placeDisplay){
   }
 }
 
+function parseGuideResponse(raw, fallbackTitle){
+  let text = raw.trim();
+  // Strip markdown fences
+  if(text.startsWith('```')){
+    text = text.replace(/^```[a-zA-Z]*/, '').replace(/```\s*$/, '').trim();
+  }
+  // Try direct parse
+  try { return JSON.parse(text); } catch(e){}
+  // Try extracting first {...} block
+  const m = text.match(/\{[\s\S]*\}/);
+  if(m){ try { return JSON.parse(m[0]); } catch(e){} }
+  // Fallback: treat as plain script
+  return {title:fallbackTitle, script:text, key_facts:[], tips:[], look_for:[], nearby_suggestions:[]};
+}
+
 async function fetchInfoWithParams(placeEn,location,placeDisplay,visitorType,duration){
   const btn=document.getElementById('ask-btn');
   if(btn) btn.disabled=true;
@@ -662,25 +677,9 @@ async function fetchInfoWithParams(placeEn,location,placeDisplay,visitorType,dur
     const raw=await res.text();
     let data;
     try {
-      let cleaned=raw.trim();
-      // Remove markdown code fences
-      if(cleaned.startsWith('```')){
-        const lines=cleaned.split('\n');
-        lines.shift(); // remove ```json line
-        if(lines[lines.length-1].trim()==='```') lines.pop();
-        cleaned=lines.join('\n').trim();
-      }
-      data=JSON.parse(cleaned);
+      data = parseGuideResponse(raw, placeDisplay);
     } catch(e){
-      // Try to extract JSON from text
-      const jsonMatch=raw.match(/\{[\s\S]*\}/);
-      if(jsonMatch){
-        try{ data=JSON.parse(jsonMatch[0]); } catch(e2){
-          data={title:placeDisplay,script:raw,key_facts:[],tips:[],look_for:[],nearby_suggestions:[]};
-        }
-      } else {
-        data={title:placeDisplay,script:raw,key_facts:[],tips:[],look_for:[],nearby_suggestions:[]};
-      }
+      data={title:placeDisplay,script:raw,key_facts:[],tips:[],look_for:[],nearby_suggestions:[]};
     }
     lastScript=data.script||raw;
     renderGuide(data);
