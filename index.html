@@ -377,6 +377,7 @@ document.addEventListener('click', e=>{
 
 function renderDurationButtons(){
   const container=document.getElementById('dur-buttons');
+  if(!container) return;
   container.innerHTML=DURATION_OPTIONS.map((d,i)=>{
     const isActive=d.dur===selectedDuration;
     const border=i>0?'border-left:1px solid #e5e5e0;':'';
@@ -409,7 +410,7 @@ async function loadNearbyAttractions(){
   if(!cityVal){ alert('ჩაწერე ქალაქის სახელი'); return; }
   const btn=document.getElementById('locate-btn');
   btn.disabled=true;
-  document.getElementById('attractions-area').innerHTML=`<div style="padding:24px;text-align:center"><div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><p style="font-size:12px;color:#bbb;margin-top:10px">${t('loading_attr')}</p></div>`;
+  (document.getElementById('attractions-area')||{}).innerHTML=`<div style="padding:24px;text-align:center"><div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><p style="font-size:12px;color:#bbb;margin-top:10px">${t('loading_attr')}</p></div>`;
 
   try {
     // Geocode the entered city
@@ -446,7 +447,7 @@ async function loadNearbyAttractions(){
 
     renderAttractions(data.attractions||[],city,country,lat,lng);
   } catch(e){
-    document.getElementById('attractions-area').innerHTML=`<div class="placeholder-box"><div class="ph-icon">⚠️</div><p>${e.message}</p></div>`;
+    (document.getElementById('attractions-area')||{}).innerHTML=`<div class="placeholder-box"><div class="ph-icon">⚠️</div><p>${e.message}</p></div>`;
   }
   btn.disabled=false;
 }
@@ -564,7 +565,7 @@ function renderAttractions(attractions,city,country,lat,lng){
       </div>
     </div>`).join('');
 
-  document.getElementById('attractions-area').innerHTML=`
+  (document.getElementById('attractions-area')||{}).innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <span style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.5px">📍 ${city}, ${country}</span>
       <span style="font-size:11px;color:#bbb">${attractions.length} ადგილი</span>
@@ -607,7 +608,7 @@ function askCustom(){
 function showLoading(placeDisplay){
   // only set loading if called directly (not from _startGuide which sets its own)
   if(placeDisplay !== '__skip__'){
-    document.getElementById('guide-inline-area').innerHTML=`
+    (document.getElementById('guide-inline-area')||{}).innerHTML=`
       <div style="padding:24px;text-align:center">
         <div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
         <p style="font-size:12px;color:#bbb;margin-top:10px">${t('loading_guide')}</p>
