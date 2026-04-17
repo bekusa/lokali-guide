@@ -628,10 +628,24 @@ async function fetchInfoWithParams(placeEn,location,placeDisplay,visitorType,dur
     let data;
     try {
       let cleaned=raw.trim();
-      if(cleaned.startsWith('```')){cleaned=cleaned.split('\n').slice(1).join('\n');cleaned=cleaned.replace(/```\s*$/,'').trim();}
+      // Remove markdown code fences
+      if(cleaned.startsWith('```')){
+        const lines=cleaned.split('\n');
+        lines.shift(); // remove ```json line
+        if(lines[lines.length-1].trim()==='```') lines.pop();
+        cleaned=lines.join('\n').trim();
+      }
       data=JSON.parse(cleaned);
     } catch(e){
-      data={title:placeDisplay,script:raw,key_facts:[],tips:[],look_for:[],nearby_suggestions:[]};
+      // Try to extract JSON from text
+      const jsonMatch=raw.match(/\{[\s\S]*\}/);
+      if(jsonMatch){
+        try{ data=JSON.parse(jsonMatch[0]); } catch(e2){
+          data={title:placeDisplay,script:raw,key_facts:[],tips:[],look_for:[],nearby_suggestions:[]};
+        }
+      } else {
+        data={title:placeDisplay,script:raw,key_facts:[],tips:[],look_for:[],nearby_suggestions:[]};
+      }
     }
     lastScript=data.script||raw;
     renderGuide(data);
@@ -669,7 +683,10 @@ async function fetchInfo(placeEn,location,placeDisplay){
 function renderGuide(data){
   const secs=data.estimated_duration_seconds||0;
   const mins=Math.round(secs/60);
-  const scriptHtml=(data.script||'').split(/\n\n+/).filter(p=>p.trim()).map(p=>{
+  // Clean script - remove any JSON artifacts
+  let cleanScript = (data.script||'');
+  if(cleanScript.trim().startsWith('{') || cleanScript.trim().startsWith('```')) cleanScript='';
+  const scriptHtml=cleanScript.split(/\n\n+/).filter(p=>p.trim()).map(p=>{
     const clean=p.trim().replace(/\[PAUSE\]/g,'<span class="pause-tag">⏸</span>');
     return `<p style="margin-bottom:13px">${clean}</p>`;
   }).join('');
