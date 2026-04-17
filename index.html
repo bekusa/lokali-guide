@@ -72,6 +72,9 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
 .attr-score-label{font-size:9px;color:#aaa}
 .attr-detail{display:none;padding:0 13px 12px;border-top:1px solid #f0f0ea;background:#fafaf7}
 .attr-detail.open{display:block}
+.tabs{display:flex;border-bottom:1.5px solid #eee;margin-bottom:1.2rem}
+.tab{flex:1;padding:9px;font-size:12px;font-weight:600;cursor:pointer;background:white;color:#aaa;border:none;border-bottom:2px solid transparent;transition:all 0.15s;text-align:center}
+.tab.active{color:#1D9E75;border-bottom-color:#1D9E75}
 .audio-guide-btn{width:100%;padding:8px;border-radius:8px;border:none;background:#1D9E75;color:white;font-size:13px;cursor:pointer;margin-top:10px;font-weight:500}
 .tab-content{display:none}
 .tab-content.active{display:block}
@@ -119,7 +122,13 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
       </div>
     </div>
 
-              <div style="display:flex;gap:8px;margin-bottom:10px">
+              <div class="tabs" style="margin-bottom:1.2rem">
+      <button class="tab active" id="tab-btn-nearby" onclick="switchTab('nearby')">📍 ადგილები</button>
+      <button class="tab" id="tab-btn-guide" onclick="switchTab('guide')">🎧 გიდი</button>
+    </div>
+
+    <div id="tab-nearby" style="display:block">
+    <div style="display:flex;gap:8px;margin-bottom:10px">
         <input type="text" id="city-input" placeholder="ქალაქი (მაგ: თბილისი)..."
           style="flex:1;padding:9px 13px;border-radius:10px;border:1.5px solid #e5e5e0;font-size:14px;color:#222"
           onkeydown="if(event.key==='Enter') loadNearbyAttractions()"/>
@@ -144,7 +153,16 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
       </div>
       <div id="guide-inline-area"></div>
     </div>
+    </div><!-- /tab-nearby -->
 
+    <div id="tab-guide" style="display:none">
+      <div id="result-area">
+        <div class="placeholder-box">
+          <div class="ph-icon">🎧</div>
+          <p id="ph-guide-text">ადგილი აირჩიე და მიიღე პერსონალური გიდი</p>
+        </div>
+      </div>
+    </div><!-- /tab-guide -->
 
   </div>
 </div>
@@ -160,10 +178,11 @@ let map=null, markers=[], infoWindows=[], currentCity='', currentCountry='';
 // ========== TABS ==========
 function switchTab(tab){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-btn-'+tab).classList.add('active');
-  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('tab-nearby').style.display=tab==='nearby'?'block':'none';
+  document.getElementById('tab-guide').style.display=tab==='guide'?'block':'none';
 }
+
 
 // ========== GOOGLE MAPS ==========
 function initMap(){
@@ -289,6 +308,8 @@ function updateUI(){
   renderVisitorTypes();
   renderDurationButtons();
   renderCards();
+  const _tbn=document.getElementById('tab-btn-nearby'); if(_tbn) _tbn.textContent=t('tab_nearby')||'📍 ადგილები';
+  const _tbg=document.getElementById('tab-btn-guide'); if(_tbg) _tbg.textContent=t('tab_guide')||'🎧 გიდი';
 }
 
 // ========== CARDS ==========
@@ -601,7 +622,7 @@ async function fetchInfo(placeEn,location,placeDisplay){
     lastScript=data.script||raw;
     renderGuide(data);
   } catch(e){
-    document.getElementById('guide-inline-area').innerHTML=`<div class="placeholder-box"><div class="ph-icon">⚠️</div><p>${e.message}</p></div>`;
+    document.getElementById('result-area').innerHTML=`<div class="placeholder-box"><div class="ph-icon">⚠️</div><p>${e.message}</p></div>`;
   }
   if(btn) btn.disabled=false;
 }
@@ -620,7 +641,7 @@ function renderGuide(data){
   const nearby=(data.nearby_suggestions||[]).map(n=>`<span class="chip chip-amber">📍 ${n}</span>`).join('');
 
   const backBtn = `<button onclick="switchTab('nearby')" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.4);background:transparent;color:white;font-size:11px;cursor:pointer;margin-bottom:8px">← ${t('tab_nearby')}</button>`;
-  document.getElementById('guide-inline-area').innerHTML=`
+  document.getElementById('result-area').innerHTML=`
     <div class="result-card">
       <div class="result-title-bar">
         ${backBtn}
@@ -644,12 +665,9 @@ function renderGuide(data){
 
 window._startGuide = function(placeEn, location, placeDisplay){
   infoWindows.forEach(w=>w.close());
-  const area = document.getElementById('guide-inline-area');
-  area.innerHTML =
-    '<div style="padding:20px;text-align:center">'+
-    '<div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>'+
-    '<p style="font-size:12px;color:#bbb;margin-top:10px">'+t('loading_guide')+'</p></div>';
-  area.scrollIntoView({behavior:'smooth', block:'start'});
+  switchTab('guide');
+  document.querySelector('.app').scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('result-area').innerHTML='<div style="padding:24px;text-align:center"><div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><p style="font-size:12px;color:#bbb;margin-top:10px">'+t('loading_guide')+'</p></div>';
   fetchInfo(placeEn, location, placeDisplay);
 };
 
