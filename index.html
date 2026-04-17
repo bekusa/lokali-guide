@@ -153,7 +153,7 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
 const GUIDE_WEBHOOK = 'https://tsitskabeka.app.n8n.cloud/webhook/guide';
 const ATTRACTIONS_WEBHOOK = 'https://tsitskabeka.app.n8n.cloud/webhook/attractions';
 let lang='ka', langFull='Georgian', lastScript='', speaking=false;
-let map=null, markers=[];
+let map=null, markers=[], infoWindows=[], currentCity='', currentCountry='';
 
 // ========== TABS ==========
 function switchTab(tab){
@@ -355,10 +355,11 @@ async function autoDetectCity(){
 }
 
 function renderAttractions(attractions,city,country,lat,lng){
+  currentCity=city; currentCountry=country;
   const typeIcons={landmark:'🏛️',museum:'🎨',nature:'🌿',religious:'⛪',historic:'🏰'};
 
   if(map && lat && lng){
-    markers.forEach(m=>m.setMap(null)); markers=[];
+    markers.forEach(m=>m.setMap(null)); markers=[]; infoWindows.forEach(w=>w.close()); infoWindows=[];
     map.setCenter({lat,lng}); map.setZoom(13);
     new google.maps.Marker({
       position:{lat,lng},map,
@@ -491,6 +492,14 @@ function renderGuide(data){
     </div>`;
   document.getElementById('speak-btn').addEventListener('click',toggleSpeak);
 }
+
+window._startGuide = function(placeEn, location, placeDisplay){
+  // close all info windows
+  infoWindows.forEach(w=>w.close());
+  // switch to search tab to show guide
+  document.querySelector('[onclick="switchTab(\'search\')"]').click();
+  fetchInfo(placeEn, location, placeDisplay);
+};
 
 function toggleSpeak(){
   if(!lastScript) return;
