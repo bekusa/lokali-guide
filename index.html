@@ -170,7 +170,7 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
   </div>
 </div>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD5j2rdYvTOfReGLsar9CfScLegbLipAmg&callback=initMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD5j2rdYvTOfReGLsar9CfScLegbLipAmg&libraries=places&callback=initMap" async defer></script>
 
 <script>
 const GUIDE_WEBHOOK = 'https://tsitskabeka.app.n8n.cloud/webhook/guide';
@@ -488,14 +488,22 @@ async function autoDetectCity(){
   btn.disabled=false; btn.textContent='🎯 ავტო-აღმოჩენა GPS-ით';
 }
 
-async function fetchWikiImage(name){
-  try {
-    const q = encodeURIComponent(name);
-    const url = 'https://en.wikipedia.org/api/rest_v1/page/summary/'+q;
-    const res = await fetch(url);
-    const data = await res.json();
-    return data.thumbnail ? data.thumbnail.source : null;
-  } catch(e){ return null; }
+function fetchPlacePhoto(name, callback){
+  if(!window.google || !window.google.maps || !window.google.maps.places){
+    callback(null); return;
+  }
+  const service = new google.maps.places.PlacesService(document.createElement('div'));
+  service.findPlaceFromQuery(
+    {query: name, fields: ['photos','name']},
+    (results, status)=>{
+      if(status===google.maps.places.PlacesServiceStatus.OK && results[0] && results[0].photos){
+        const photo = results[0].photos[0];
+        callback(photo.getUrl({maxWidth:400, maxHeight:220}));
+      } else {
+        callback(null);
+      }
+    }
+  );
 }
 
 let currentAttractions=[];
@@ -583,9 +591,9 @@ function renderAttractions(attractions,city,country,lat,lng){
       <span style="font-size:11px;color:#bbb">${attractions.length} ადგილი</span>
     </div>
     <div style="display:flex;flex-direction:column;gap:8px">${cards}</div>`;
-  // Load images async
+  // Load images via Google Places API
   attractions.forEach((a,i)=>{
-    fetchWikiImage(a.name).then(imgUrl=>{
+    fetchPlacePhoto(a.name, imgUrl=>{
       if(!imgUrl) return;
       const img = document.getElementById('attr-img-'+i);
       const ph  = document.getElementById('attr-img-placeholder-'+i);
