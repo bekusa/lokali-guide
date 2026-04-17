@@ -151,6 +151,7 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
           <p id="ph-nearby-text">ჩაწერე ქალაქი და<br>იპოვე სანახაობები</p>
         </div>
       </div>
+      <div id="guide-inline-area"></div>
     </div>
 
     <div id="tab-guide" class="tab-content">
@@ -575,7 +576,8 @@ async function fetchInfo(placeEn,location,placeDisplay){
     lastScript=data.script||raw;
     renderGuide(data);
   } catch(e){
-    document.getElementById('result-area').innerHTML=`<div class="placeholder-box"><div class="ph-icon">⚠️</div><p>${e.message}</p></div>`;
+    const errTarget = document.getElementById('guide-inline-area') || document.getElementById('result-area');
+    errTarget.innerHTML=`<div class="placeholder-box"><div class="ph-icon">⚠️</div><p>${e.message}</p></div>`;
   }
   if(btn) btn.disabled=false;
 }
@@ -613,28 +615,17 @@ function renderGuide(data){
         ${mins?`<span class="duration-badge">~${mins} წთ</span>`:''}
       </div>
     </div>`;
-  document.getElementById('speak-btn').addEventListener('click',toggleSpeak);
+  const spk=document.getElementById('speak-btn'); if(spk) spk.addEventListener('click',toggleSpeak);
 }
 
 window._startGuide = function(placeEn, location, placeDisplay){
   infoWindows.forEach(w=>w.close());
-  // switch to guide tab
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-btn-guide').classList.add('active');
-  document.getElementById('tab-guide').classList.add('active');
-  // scroll to top
-  document.querySelector('.app').scrollIntoView({behavior:'smooth',block:'start'});
-  // show selected place header
-  document.getElementById('result-area').innerHTML=`
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;margin-bottom:12px;border-bottom:1.5px solid #eee">
-      <button onclick="switchTab('nearby')" style="padding:6px 10px;border-radius:8px;border:1.5px solid #eee;background:white;font-size:12px;cursor:pointer;color:#555">← ${t('tab_nearby')}</button>
-      <span style="font-size:14px;font-weight:600;color:#222;flex:1">${placeDisplay}</span>
-    </div>
-    <div style="padding:24px;text-align:center">
-      <div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-      <p style="font-size:12px;color:#bbb;margin-top:10px">${t('loading_guide')}</p>
-    </div>`;
+  // scroll to guide area
+  const guideArea = document.getElementById('guide-inline-area');
+  if(guideArea){
+    guideArea.innerHTML = '<div style="padding:20px;text-align:center"><div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><p style="font-size:12px;color:#bbb;margin-top:10px">'+t('loading_guide')+'</p></div>';
+    guideArea.scrollIntoView({behavior:'smooth', block:'start'});
+  }
   fetchInfo(placeEn, location, placeDisplay);
 };
 
