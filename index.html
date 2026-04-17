@@ -103,6 +103,22 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
       <div class="lang-menu" id="lang-menu"></div>
     </div>
 
+    <div style="display:flex;gap:10px;margin-bottom:1.2rem">
+      <div style="flex:1">
+        <div class="section-label" id="label-visitor">ვიზიტორის ტიპი</div>
+        <div style="position:relative">
+          <select id="visitor-type" style="width:100%;padding:9px 13px;border-radius:10px;border:1.5px solid #e5e5e0;font-size:13px;color:#222;background:white;appearance:none;cursor:pointer">
+          </select>
+          <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;color:#aaa;pointer-events:none">▼</span>
+        </div>
+      </div>
+      <div style="flex:1">
+        <div class="section-label" id="label-duration">გიდის ხანგრძლივობა</div>
+        <div id="dur-buttons" style="display:flex;gap:0;border:1.5px solid #e5e5e0;border-radius:10px;overflow:hidden">
+        </div>
+      </div>
+    </div>
+
     <div class="tabs">
       <button class="tab active" id="tab-btn-nearby" onclick="switchTab('nearby')">📍 ადგილები</button>
       <button class="tab" id="tab-btn-guide" onclick="switchTab('guide')">🎧 გიდი</button>
@@ -123,13 +139,13 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
         🎯 GPS-ით ავტო-აღმოჩენა
       </button>
       <div id="map-area" style="display:none;margin-bottom:12px">
-        <div class="section-label">🗺️ რუკა</div>
+        <div class="section-label" id="label-map">🗺️ რუკა</div>
         <div class="map-container" id="map"></div>
       </div>
       <div id="attractions-area">
         <div class="placeholder-box" id="placeholder-box">
           <div class="ph-icon">🗺️</div>
-          <p>ჩაწერე ქალაქი და<br>იპოვე სანახაობები</p>
+          <p id="ph-nearby-text">ჩაწერე ქალაქი და<br>იპოვე სანახაობები</p>
         </div>
       </div>
     </div>
@@ -138,7 +154,7 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
       <div id="result-area">
         <div class="placeholder-box">
           <div class="ph-icon">🎧</div>
-          <p>ადგილებიდან აირჩიე სანახაობა<br>და მიიღე პერსონალური აუდიო გიდი</p>
+          <p id="ph-guide-text">ადგილებიდან აირჩიე სანახაობა<br>და მიიღე პერსონალური აუდიო გიდი</p>
         </div>
       </div>
     </div>
@@ -152,7 +168,7 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
 <script>
 const GUIDE_WEBHOOK = 'https://tsitskabeka.app.n8n.cloud/webhook/guide';
 const ATTRACTIONS_WEBHOOK = 'https://tsitskabeka.app.n8n.cloud/webhook/attractions';
-let lang='ka', langFull='Georgian', lastScript='', speaking=false;
+let lang='ka', langFull='Georgian', lastScript='', speaking=false, selectedDuration=3;
 let map=null, markers=[], infoWindows=[], currentCity='', currentCountry='';
 
 // ========== TABS ==========
@@ -228,9 +244,9 @@ const LANGUAGES=[
 ];
 
 const UI={
-  ka:{place:'ადგილი',popular:'პოპულარული ადგილები',search:'ნებისმიერი ადგილი...',ask:'კითხვა',tagline:'AI მოგზაურობის გიდი — ყველა ენაზე',lang_label:'ენა',nearby:'📍 ჩემთან ახლოს სანახაობები',loading_attr:'ლოკაცია და სანახაობები...',loading_guide:'AI გიდი მზადდება...',audio:'▶ ხმოვანი გიდი',stop:'■ გაჩერება',script:'🎙️ სკრიპტი',facts:'💡 ძირითადი ფაქტები',look:'👁️ ყურადღება მიაქციე',tips:'🗺️ პრაქტიკული რჩევები',nb:'☕ ახლოს',full_guide:'🎧 სრული აუდიო გიდი'},
-  en:{place:'Place',popular:'Popular Places',search:'Any place...',ask:'Search',tagline:'AI Travel Guide — Every Language',lang_label:'Language',nearby:'📍 Nearby Attractions',loading_attr:'Finding your location...',loading_guide:'AI guide preparing...',audio:'▶ Audio Guide',stop:'■ Stop',script:'🎙️ Script',facts:'💡 Key Facts',look:'👁️ Look For',tips:'🗺️ Practical Tips',nb:'☕ Nearby',full_guide:'🎧 Full Audio Guide'},
-  ru:{place:'Место',popular:'Популярные места',search:'Любое место...',ask:'Найти',tagline:'AI Аудиогид — На любом языке',lang_label:'Язык',nearby:'📍 Рядом со мной',loading_attr:'Определяем локацию...',loading_guide:'ИИ готовит гид...',audio:'▶ Аудиогид',stop:'■ Стоп',script:'🎙️ Текст',facts:'💡 Ключевые факты',look:'👁️ Обратите внимание',tips:'🗺️ Советы',nb:'☕ Рядом',full_guide:'🎧 Полный аудиогид'},
+  ka:{place:'ადგილი',popular:'პოპულარული ადგილები',search:'ნებისმიერი ადგილი...',ask:'კითხვა',tagline:'AI მოგზაურობის გიდი — ყველა ენაზე',lang_label:'ენა',nearby:'📍 ჩემთან ახლოს სანახაობები',loading_attr:'ლოკაცია და სანახაობები...',loading_guide:'AI გიდი მზადდება...',audio:'▶ ხმოვანი გიდი',stop:'■ გაჩერება',visitor_label:'ვიზიტორის ტიპი',duration_label:'ხანგრძლივობა',tab_nearby:'📍 ადგილები',tab_guide:'🎧 გიდი',search_btn:'📍 ძებნა',gps_btn:'🎯 GPS-ით ავტო-აღმოჩენა',city_ph:'ქალაქი (მაგ: თბილისი)...',map_lbl:'🗺️ რუკა',ph_nearby:'ჩაწერე ქალაქი და<br>იპოვე სანახაობები',ph_guide:'ადგილებიდან აირჩიე სანახაობა<br>და მიიღე პერსონალური აუდიო გიდი',script:'🎙️ სკრიპტი',facts:'💡 ძირითადი ფაქტები',look:'👁️ ყურადღება მიაქციე',tips:'🗺️ პრაქტიკული რჩევები',nb:'☕ ახლოს',full_guide:'🎧 სრული აუდიო გიდი'},
+  en:{place:'Place',popular:'Popular Places',search:'Any place...',ask:'Search',tagline:'AI Travel Guide — Every Language',lang_label:'Language',nearby:'📍 Nearby Attractions',loading_attr:'Finding your location...',loading_guide:'AI guide preparing...',audio:'▶ Audio Guide',stop:'■ Stop',visitor_label:'Visitor Type',duration_label:'Duration',tab_nearby:'📍 Places',tab_guide:'🎧 Guide',search_btn:'📍 Search',gps_btn:'🎯 Auto-detect GPS',city_ph:'City (e.g. Paris)...',map_lbl:'🗺️ Map',ph_nearby:'Enter a city and<br>discover attractions',ph_guide:'Choose an attraction<br>to get your audio guide',script:'🎙️ Script',facts:'💡 Key Facts',look:'👁️ Look For',tips:'🗺️ Practical Tips',nb:'☕ Nearby',full_guide:'🎧 Full Audio Guide'},
+  ru:{place:'Место',popular:'Популярные места',search:'Любое место...',ask:'Найти',tagline:'AI Аудиогид — На любом языке',lang_label:'Язык',nearby:'📍 Рядом со мной',loading_attr:'Определяем локацию...',loading_guide:'ИИ готовит гид...',audio:'▶ Аудиогид',stop:'■ Стоп',visitor_label:'Тип посетителя',duration_label:'Длительность',tab_nearby:'📍 Места',tab_guide:'🎧 Гид',search_btn:'📍 Поиск',gps_btn:'🎯 GPS-определение',city_ph:'Город (напр. Тбилиси)...',map_lbl:'🗺️ Карта',ph_nearby:'Введите город и<br>найдите достопримечательности',ph_guide:'Выберите место<br>для аудиогида',script:'🎙️ Текст',facts:'💡 Ключевые факты',look:'👁️ Обратите внимание',tips:'🗺️ Советы',nb:'☕ Рядом',full_guide:'🎧 Полный аудиогид'},
 };
 
 function t(key){ return (UI[lang]||UI['en'])[key]||UI['en'][key]||key; }
@@ -250,6 +266,14 @@ LANGUAGES.forEach(l=>{
   menu.appendChild(item);
 });
 
+function setDuration(btn){
+  document.querySelectorAll('.dur-btn').forEach(b=>{
+    b.style.background='white'; b.style.color='#555';
+  });
+  btn.style.background='#1D9E75'; btn.style.color='white';
+  selectedDuration=parseInt(btn.dataset.dur);
+}
+
 function toggleLangMenu(){
   const m=document.getElementById('lang-menu');
   m.style.display=m.style.display==='none'||m.style.display===''?'block':'none';
@@ -259,13 +283,25 @@ document.addEventListener('click',e=>{
 });
 
 function updateUI(){
-  document.getElementById('app-tagline').textContent=t('tagline');
-  document.getElementById('label-lang').textContent=t('lang_label');
-  const lp=document.getElementById('label-place'); if(lp) lp.textContent=t('place');
-  const lpo=document.getElementById('label-popular'); if(lpo) lpo.textContent=t('popular').toUpperCase();
-  const inp=document.getElementById('custom-input'); if(inp) inp.placeholder=t('search');
-  const ab=document.getElementById('ask-btn'); if(ab) ab.textContent=t('ask')+' ↗';
-  const lb=document.getElementById('locate-btn'); if(lb) lb.textContent=t('nearby');
+  const el = id => document.getElementById(id);
+  if(el('app-tagline')) el('app-tagline').textContent=t('tagline');
+  if(el('label-lang')) el('label-lang').textContent=t('lang_label');
+  if(el('label-place')) el('label-place').textContent=t('place');
+  if(el('label-popular')) el('label-popular').textContent=t('popular').toUpperCase();
+  if(el('custom-input')) el('custom-input').placeholder=t('search');
+  if(el('ask-btn')) el('ask-btn').textContent=t('ask')+' ↗';
+  if(el('locate-btn')) el('locate-btn').textContent=t('search_btn');
+  if(el('auto-btn')) el('auto-btn').textContent=t('gps_btn');
+  if(el('city-input')) el('city-input').placeholder=t('city_ph');
+  if(el('label-visitor')) el('label-visitor').textContent=t('visitor_label');
+  if(el('label-duration')) el('label-duration').textContent=t('duration_label');
+  if(el('label-map')) el('label-map').textContent=t('map_lbl');
+  if(el('tab-btn-nearby')) el('tab-btn-nearby').textContent=t('tab_nearby');
+  if(el('tab-btn-guide')) el('tab-btn-guide').textContent=t('tab_guide');
+  if(el('ph-nearby-text')) el('ph-nearby-text').innerHTML=t('ph_nearby');
+  if(el('ph-guide-text')) el('ph-guide-text').innerHTML=t('ph_guide');
+  renderVisitorTypes();
+  renderDurationButtons();
   renderCards();
 }
 
@@ -280,6 +316,41 @@ const CARDS_DATA=[
   {placeEn:'Sighnaghi old town',location:'Kakheti, Georgia',icon:'🏘️',
    tr:{ka:{type:'ისტ. ქალაქი',name:'სიღნაღი',loc:'კახეთი'},en:{type:'Historic Town',name:'Sighnaghi',loc:'Kakheti'},ru:{type:'Ист. город',name:'Сигнахи',loc:'Кахетия'}}},
 ];
+
+const VISITOR_TYPES=[
+  {value:'first-time tourist',    icon:'🧳', labels:{ka:'პირველი ვიზიტი',en:'First-time Tourist',ru:'Первый визит',tr:'İlk Ziyaret',de:'Erster Besuch',fr:'Premier voyage',es:'Primera visita',it:'Prima visita',zh:'初次游客',ja:'初めての観光',ko:'첫 방문',ar:'زيارة أولى'}},
+  {value:'history buff',          icon:'📜', labels:{ka:'ისტორიის მოყვარული',en:'History Buff',ru:'Любитель истории',tr:'Tarih Meraklısı',de:'Geschichtsliebhaber',fr:'Passionné dhistoire',es:'Amante de la historia',it:'Appassionato di storia',zh:'历史爱好者',ja:'歴史好き',ko:'역사 애호가',ar:'محب التاريخ'}},
+  {value:'family with kids',      icon:'👨‍👩‍👧', labels:{ka:'ოჯახი ბავშვებით',en:'Family with Kids',ru:'Семья с детьми',tr:'Çocuklu Aile',de:'Familie mit Kindern',fr:'Famille avec enfants',es:'Familia con niños',it:'Famiglia con bambini',zh:'亲子家庭',ja:'子連れファミリー',ko:'아이와 함께',ar:'عائلة مع أطفال'}},
+  {value:'architecture lover',    icon:'🏛️', labels:{ka:'არქიტექტურის მოყვარული',en:'Architecture Lover',ru:'Любитель архитектуры',tr:'Mimarlık Tutkunu',de:'Architekturliebhaber',fr:'Amateur darchitecture',es:'Amante arquitectura',it:'Amante architettura',zh:'建筑爱好者',ja:'建築好き',ko:'건축 애호가',ar:'محب العمارة'}},
+  {value:'art enthusiast',        icon:'🎨', labels:{ka:'ხელოვნების მოყვარული',en:'Art Enthusiast',ru:'Любитель искусства',tr:'Sanat Tutkunu',de:'Kunstliebhaber',fr:'Amateur dart',es:'Amante del arte',it:'Appassionato darte',zh:'艺术爱好者',ja:'アート好き',ko:'예술 애호가',ar:'محب الفن'}},
+  {value:'adventure seeker',      icon:'🧗', labels:{ka:'თავგადასავლის მაძიებელი',en:'Adventure Seeker',ru:'Искатель приключений',tr:'Macera Arayışı',de:'Abenteuersucher',fr:'Chercheur daventure',es:'Aventurero',it:'Cercatore avventura',zh:'探险爱好者',ja:'アドベンチャー好き',ko:'모험가',ar:'باحث عن المغامرة'}},
+  {value:'photography enthusiast',icon:'📸', labels:{ka:'ფოტოგრაფი',en:'Photography Enthusiast',ru:'Фотограф',tr:'Fotoğraf Tutkunu',de:'Fotograf',fr:'Photographe',es:'Fotógrafo',it:'Fotografo',zh:'摄影爱好者',ja:'写真好き',ko:'사진 애호가',ar:'محب التصوير'}},
+  {value:'senior traveler',       icon:'🧓', labels:{ka:'ხანდაზმული მოგზაური',en:'Senior Traveler',ru:'Путешественник в возрасте',tr:'Yaşlı Gezgin',de:'Älterer Reisender',fr:'Voyageur senior',es:'Viajero mayor',it:'Viaggiatore senior',zh:'老年游客',ja:'シニア旅行者',ko:'시니어 여행자',ar:'مسافر كبير السن'}},
+];
+
+const DURATION_OPTIONS=[
+  {dur:3,  icon:'⚡', labels:{ka:'3 წთ',en:'3 min',ru:'3 мин',tr:'3 dk',de:'3 Min',fr:'3 min',es:'3 min',it:'3 min',zh:'3分钟',ja:'3分',ko:'3분',ar:'٣ دق'}},
+  {dur:7,  icon:'🎯', labels:{ka:'7 წთ',en:'7 min',ru:'7 мин',tr:'7 dk',de:'7 Min',fr:'7 min',es:'7 min',it:'7 min',zh:'7分钟',ja:'7分',ko:'7분',ar:'٧ دق'}},
+  {dur:12, icon:'🎬', labels:{ka:'12 წთ',en:'12 min',ru:'12 мин',tr:'12 dk',de:'12 Min',fr:'12 min',es:'12 min',it:'12 min',zh:'12分钟',ja:'12分',ko:'12분',ar:'١٢ دق'}},
+];
+
+function renderVisitorTypes(){
+  const sel=document.getElementById('visitor-type');
+  const curVal=sel.value||'first-time tourist';
+  sel.innerHTML=VISITOR_TYPES.map(v=>`<option value="${v.value}" ${v.value===curVal?'selected':''}>${v.icon} ${v.labels[lang]||v.labels['en']}</option>`).join('');
+}
+
+function renderDurationButtons(){
+  const container=document.getElementById('dur-buttons');
+  container.innerHTML=DURATION_OPTIONS.map((d,i)=>{
+    const isActive=d.dur===selectedDuration;
+    const border=i>0?'border-left:1px solid #e5e5e0;':'';
+    return `<button class="dur-btn${isActive?' active':''}" data-dur="${d.dur}" onclick="setDuration(this)"
+      style="flex:1;padding:9px 4px;border:none;${border}background:${isActive?'#1D9E75':'white'};color:${isActive?'white':'#555'};font-size:12px;font-weight:600;cursor:pointer">
+      ${d.icon} ${d.labels[lang]||d.labels['en']}
+    </button>`;
+  }).join('');
+}
 
 function renderCards(){
   const container=document.getElementById('cards-container');
@@ -440,7 +511,7 @@ async function fetchInfo(placeEn,location,placeDisplay){
     const res=await fetch(GUIDE_WEBHOOK,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({place:placeEn,location,language:langFull,visitor_type:'tourist',duration:5})
+      body:JSON.stringify({place:placeEn,location,language:langFull,visitor_type:document.getElementById('visitor-type').value,duration:selectedDuration})
     });
     const raw=await res.text();
     let data;
@@ -511,6 +582,8 @@ function toggleSpeak(){
 }
 
 renderCards();
+renderVisitorTypes();
+renderDurationButtons();
 </script>
 </body>
 </html>
