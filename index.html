@@ -106,25 +106,7 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
       <div class="lang-menu" id="lang-menu"></div>
     </div>
 
-              <div style="display:flex;gap:10px;margin-bottom:1.2rem">
-      <div style="flex:1">
-        <div class="section-label" id="label-visitor">ჩემი ინტერესი</div>
-        <div style="position:relative" id="visitor-dropdown-wrap">
-          <div id="visitor-selected" onclick="toggleVisitorMenu()" style="display:flex;align-items:center;gap:7px;padding:9px 13px;border-radius:10px;border:1.5px solid #e5e5e0;cursor:pointer;background:white;user-select:none">
-            <span id="visitor-icon" style="font-size:15px">🧳</span>
-            <span id="visitor-name" style="font-size:13px;color:#222;flex:1">პირველი ვიზიტი</span>
-            <span style="font-size:10px;color:#aaa">▼</span>
-          </div>
-          <div id="visitor-menu" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:white;border:1.5px solid #e5e5e0;border-radius:10px;overflow:hidden;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,0.08);max-height:220px;overflow-y:auto"></div>
-        </div>
-      </div>
-      <div style="flex:1">
-        <div class="section-label" id="label-duration">გიდის ხანგრძლივობა</div>
-        <div id="dur-buttons" style="display:flex;border:1.5px solid #e5e5e0;border-radius:10px;overflow:hidden"></div>
-      </div>
-    </div>
-
-    <div class="tabs" style="margin-bottom:1.2rem">
+              <div class="tabs" style="margin-bottom:1.2rem">
       <button class="tab active" id="tab-btn-nearby" onclick="switchTab('nearby')">📍 ადგილები</button>
       <button class="tab" id="tab-btn-guide" onclick="switchTab('guide')">🎧 გიდი</button>
     </div>
@@ -307,11 +289,7 @@ function updateUI(){
   if(el('tab-btn-guide')) el('tab-btn-guide').textContent=t('tab_guide');
   if(el('ph-nearby-text')) el('ph-nearby-text').innerHTML=t('ph_nearby');
   if(el('ph-guide-text')) el('ph-guide-text').innerHTML=t('ph_guide');
-  renderVisitorTypes();
-  renderDurationButtons();
   renderCards();
-  const _lv=document.getElementById('label-visitor'); if(_lv) _lv.textContent=t('visitor_label');
-  const _ld=document.getElementById('label-duration'); if(_ld) _ld.textContent=t('duration_label');
   const _tbn=document.getElementById('tab-btn-nearby'); if(_tbn) _tbn.textContent=t('tab_nearby')||'📍 ადგილები';
   const _tbg=document.getElementById('tab-btn-guide'); if(_tbg) _tbg.textContent=t('tab_guide')||'🎧 გიდი';
 }
