@@ -736,8 +736,8 @@ function renderGuide(data){
         <div class="result-title">🎧 ${data.title||'Audio Guide'}</div>
         <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">
           ${currentCardIndex>=0 ? (() => {
-            const vt = cardVisitorTypes[currentCardIndex]||'first-time tourist';
-            const dur = cardDurations[currentCardIndex]||3;
+            const vt = cardV[currentCardIndex]||'first-time tourist';
+            const dur = cardD[currentCardIndex]||3;
             const vtObj = VISITOR_TYPES.find(v=>v.value===vt)||VISITOR_TYPES[0];
             const durObj = DURATION_OPTIONS.find(d=>d.dur===dur)||DURATION_OPTIONS[0];
             return '<span style="font-size:11px;background:rgba(255,255,255,0.2);padding:3px 8px;border-radius:10px">'+vtObj.icon+' '+( vtObj.labels[lang]||vtObj.labels.en)+'</span>'+
