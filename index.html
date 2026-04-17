@@ -606,7 +606,26 @@ function renderAttractions(attractions,city,country,lat,lng){
 
 function toggleAttr(i){
   const d=document.getElementById('attr-'+i);
+  const wasOpen = d.classList.contains('open');
   d.classList.toggle('open');
+  if(!wasOpen){
+    // Init card with global values if not set
+    if(!cardV[i]) cardV[i]=selectedVisitorType||'first-time tourist';
+    if(!cardD[i]) cardD[i]=selectedDuration||3;
+    // Update card UI to reflect current values
+    const cur=VISITOR_TYPES.find(v=>v.value===cardV[i])||VISITOR_TYPES[0];
+    const ic=document.getElementById('cvi-'+i);
+    const nm=document.getElementById('cvn-'+i);
+    if(ic) ic.textContent=cur.icon;
+    if(nm) nm.textContent=cur.labels[lang]||cur.labels.en;
+    // Update duration buttons
+    const wrap=document.getElementById('cdb-wrap-'+i);
+    if(wrap) wrap.querySelectorAll('.cdb').forEach(b=>{
+      const active=parseInt(b.dataset.dur)===cardD[i];
+      b.style.background=active?'#1D9E75':'white';
+      b.style.color=active?'white':'#555';
+    });
+  }
 }
 
 function startGuide(placeEn,location,placeDisplay){
@@ -758,7 +777,7 @@ window._startGuideWithParams = function(placeEn, location, placeDisplay, visitor
 };
 
 window._startGuide = function(placeEn, location, placeDisplay){
-  window._startGuideWithParams(placeEn, location, placeDisplay, 'first-time tourist', 3);
+  window._startGuideWithParams(placeEn, location, placeDisplay, selectedVisitorType||'first-time tourist', selectedDuration||3);
 };
 
 const cardV={}, cardD={};
@@ -805,8 +824,8 @@ function launchGuide(i){
   const a=currentAttractions[i];
   if(!a) return;
   currentCardIndex=i;
-  const vt=cardV[i]||'first-time tourist';
-  const dur=cardD[i]||3;
+  const vt=cardV[i]||selectedVisitorType||'first-time tourist';
+  const dur=cardD[i]||selectedDuration||3;
   window._startGuideWithParams(a.name,currentCity+', '+currentCountry,a.name,vt,dur);
 }
 
