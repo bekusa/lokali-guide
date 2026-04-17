@@ -555,11 +555,26 @@ function renderAttractions(attractions,city,country,lat,lng){
       </div>
       <div class="attr-detail" id="attr-${i}">
         <p style="font-size:13px;color:#444;line-height:1.6;margin:10px 0 8px">${a.inside_desc||''}</p>
-        <div class="chips">
+        <div class="chips" style="margin-bottom:12px">
           <span class="chip chip-amber">⭐ ${a.best_time||''}</span>
           <span class="chip chip-green">⏱ ${a.visit_duration||''}</span>
         </div>
-        <button class="audio-guide-btn" onclick="event.stopPropagation();window._startGuide('${a.name.replace(/'/g,"\\'")}','${city}, ${country}','${a.name.replace(/'/g,"\\'")}')">
+        <div style="border-top:1px solid #f0f0ea;padding-top:12px">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#aaa;margin-bottom:5px">${t('visitor_label')}</div>
+          <div id="cvw-${i}" style="position:relative;margin-bottom:10px">
+            <div onclick="event.stopPropagation();toggleCV(${i})" style="display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:8px;border:1.5px solid #e5e5e0;cursor:pointer;background:white;user-select:none">
+              <span id="cvi-${i}" style="font-size:14px">🧳</span>
+              <span id="cvn-${i}" style="font-size:12px;color:#222;flex:1">${VISITOR_TYPES[0].labels[lang]||VISITOR_TYPES[0].labels.en}</span>
+              <span style="font-size:9px;color:#aaa">▼</span>
+            </div>
+            <div id="cvm-${i}" style="display:none;position:absolute;bottom:calc(100% + 4px);left:0;right:0;background:white;border:1.5px solid #e5e5e0;border-radius:8px;z-index:300;box-shadow:0 4px 16px rgba(0,0,0,0.1);max-height:180px;overflow-y:auto"></div>
+          </div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#aaa;margin-bottom:5px">${t('duration_label')}</div>
+          <div id="cdb-wrap-${i}" style="display:flex;border:1.5px solid #e5e5e0;border-radius:8px;overflow:hidden;margin-bottom:10px">
+            ${DURATION_OPTIONS.map((d,di)=>'<button onclick="event.stopPropagation();setCD('+i+',this)" data-dur="'+d.dur+'" class="cdb" style="flex:1;padding:6px 2px;border:none;'+(di>0?'border-left:1px solid #e5e5e0;':'')+'background:'+(d.dur===3?'#1D9E75':'white')+';color:'+(d.dur===3?'white':'#555')+';font-size:11px;font-weight:600;cursor:pointer">'+d.icon+' '+(d.labels[lang]||d.labels.en)+'</button>').join('')}
+          </div>
+        </div>
+        <button class="audio-guide-btn" onclick="event.stopPropagation();launchGuide(${i})">
           ${t('full_guide')}
         </button>
       </div>
