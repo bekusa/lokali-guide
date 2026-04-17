@@ -495,16 +495,18 @@ function askCustom(){
   fetchInfo(v,'',v);
 }
 
-function showLoading(){
-  document.getElementById('result-area').innerHTML=`
-    <div style="padding:24px;text-align:center">
-      <div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-      <p style="font-size:12px;color:#bbb;margin-top:10px">${t('loading_guide')}</p>
-    </div>`;
+function showLoading(placeDisplay){
+  // only set loading if called directly (not from _startGuide which sets its own)
+  if(placeDisplay !== '__skip__'){
+    document.getElementById('result-area').innerHTML=`
+      <div style="padding:24px;text-align:center">
+        <div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <p style="font-size:12px;color:#bbb;margin-top:10px">${t('loading_guide')}</p>
+      </div>`;
+  }
 }
 
 async function fetchInfo(placeEn,location,placeDisplay){
-  showLoading();
   const btn=document.getElementById('ask-btn');
   if(btn) btn.disabled=true;
   try {
@@ -542,9 +544,11 @@ function renderGuide(data){
   const lookFor=(data.look_for||[]).map(l=>`<span class="chip chip-blue">👁 ${l}</span>`).join('');
   const nearby=(data.nearby_suggestions||[]).map(n=>`<span class="chip chip-amber">📍 ${n}</span>`).join('');
 
+  const backBtn = `<button onclick="switchTab('nearby')" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.4);background:transparent;color:white;font-size:11px;cursor:pointer;margin-bottom:8px">← ${t('tab_nearby')}</button>`;
   document.getElementById('result-area').innerHTML=`
     <div class="result-card">
       <div class="result-title-bar">
+        ${backBtn}
         <div class="result-title">🎧 ${data.title||'Audio Guide'}</div>
         ${mins?`<div class="result-duration">⏱ ~${mins} წუთი</div>`:''}
       </div>
@@ -565,7 +569,23 @@ function renderGuide(data){
 
 window._startGuide = function(placeEn, location, placeDisplay){
   infoWindows.forEach(w=>w.close());
-  switchTab('guide');
+  // switch to guide tab
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-btn-guide').classList.add('active');
+  document.getElementById('tab-guide').classList.add('active');
+  // scroll to top
+  document.querySelector('.app').scrollIntoView({behavior:'smooth',block:'start'});
+  // show selected place header
+  document.getElementById('result-area').innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;margin-bottom:12px;border-bottom:1.5px solid #eee">
+      <button onclick="switchTab('nearby')" style="padding:6px 10px;border-radius:8px;border:1.5px solid #eee;background:white;font-size:12px;cursor:pointer;color:#555">← ${t('tab_nearby')}</button>
+      <span style="font-size:14px;font-weight:600;color:#222;flex:1">${placeDisplay}</span>
+    </div>
+    <div style="padding:24px;text-align:center">
+      <div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <p style="font-size:12px;color:#bbb;margin-top:10px">${t('loading_guide')}</p>
+    </div>`;
   fetchInfo(placeEn, location, placeDisplay);
 };
 
