@@ -738,71 +738,60 @@ window._startGuide = function(placeEn, location, placeDisplay){
   window._startGuideWithParams(placeEn, location, placeDisplay, 'first-time tourist', 3);
 };
 
-const cardVisitorTypes = {};
-const cardDurations = {};
+const cardV={}, cardD={};
 
-function toggleCardVisitor(i){
-  const menu = document.getElementById('card-visitor-menu-'+i);
-  if(!menu) return;
-  if(menu.style.display !== 'none'){ menu.style.display='none'; return; }
-  menu.innerHTML = VISITOR_TYPES.map(v=>{
-    const label = v.labels[lang]||v.labels['en'];
-    const isActive = (cardVisitorTypes[i]||'first-time tourist') === v.value;
-    const item = document.createElement('div');
-    item.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;font-size:12px;background:'+(isActive?'#f0faf6':'white');
-    item.innerHTML='<span style="font-size:14px">'+v.icon+'</span><span style="color:#222">'+label+'</span>';
-    item.addEventListener('mouseenter',()=>item.style.background='#f5f5f0');
-    item.addEventListener('mouseleave',()=>item.style.background=isActive?'#f0faf6':'white');
-    item.addEventListener('click',()=>{
-      cardVisitorTypes[i]=v.value;
-      document.getElementById('card-visitor-icon-'+i).textContent=v.icon;
-      document.getElementById('card-visitor-name-'+i).textContent=label;
-      menu.style.display='none';
-    });
-    return item.outerHTML;
-  }).join('');
-  // re-attach events
-  menu.querySelectorAll('div').forEach((el,vi)=>{
-    const v=VISITOR_TYPES[vi];
-    el.addEventListener('click',()=>{
-      cardVisitorTypes[i]=v.value;
-      document.getElementById('card-visitor-icon-'+i).textContent=v.icon;
-      document.getElementById('card-visitor-name-'+i).textContent=v.labels[lang]||v.labels['en'];
-      menu.style.display='none';
-    });
+function toggleCV(i){
+  const m=document.getElementById('cvm-'+i);
+  if(!m) return;
+  if(m.style.display!=='none'){m.style.display='none';return;}
+  m.innerHTML='';
+  VISITOR_TYPES.forEach(v=>{
+    const el=document.createElement('div');
+    const lbl=v.labels[lang]||v.labels.en;
+    const active=(cardV[i]||'first-time tourist')===v.value;
+    el.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;font-size:12px;background:'+(active?'#f0faf6':'white');
+    el.innerHTML='<span style="font-size:14px">'+v.icon+'</span><span>'+lbl+'</span>';
+    el.onmouseenter=()=>el.style.background='#f5f5f0';
+    el.onmouseleave=()=>el.style.background=active?'#f0faf6':'white';
+    el.onclick=()=>{
+      cardV[i]=v.value;
+      const ic=document.getElementById('cvi-'+i);
+      const nm=document.getElementById('cvn-'+i);
+      if(ic) ic.textContent=v.icon;
+      if(nm) nm.textContent=lbl;
+      m.style.display='none';
+    };
+    m.appendChild(el);
   });
-  menu.style.display='block';
+  m.style.display='block';
 }
 
-function setCardDuration(i, btn){
-  const container = document.getElementById('card-dur-'+i);
-  if(!container) return;
-  container.querySelectorAll('.card-dur-btn').forEach(b=>{
-    b.style.background='white'; b.style.color='#555';
-  });
+function setCD(i,btn){
+  const wrap=btn.closest('div');
+  if(wrap) wrap.querySelectorAll('.cdb').forEach(b=>{b.style.background='white';b.style.color='#555';});
   btn.style.background='#1D9E75'; btn.style.color='white';
-  cardDurations[i] = parseInt(btn.dataset.dur);
+  cardD[i]=parseInt(btn.dataset.dur);
 }
 
-document.addEventListener('click', e=>{
-  if(!e.target.closest('[id^="card-visitor-wrap-"]')){
-    document.querySelectorAll('[id^="card-visitor-menu-"]').forEach(m=>m.style.display='none');
-  }
+document.addEventListener('click',e=>{
+  if(!e.target.closest('[id^="cvw-"]'))
+    document.querySelectorAll('[id^="cvm-"]').forEach(m=>m.style.display='none');
 });
 
-window._startGuideByCard = function(i){
-  const a = currentAttractions[i];
+function launchGuide(i){
+  const a=currentAttractions[i];
   if(!a) return;
-  currentCardIndex = i;
-  const visitorType = cardVisitorTypes[i] || 'first-time tourist';
-  const duration = cardDurations[i] || 3;
-  window._startGuideWithParams(a.name, currentCity+', '+currentCountry, a.name, visitorType, duration);
-};
+  currentCardIndex=i;
+  const vt=cardV[i]||'first-time tourist';
+  const dur=cardD[i]||3;
+  window._startGuideWithParams(a.name,currentCity+', '+currentCountry,a.name,vt,dur);
+}
 
-window._startGuideById = function(i){
-  const a = currentAttractions[i];
+window._startGuideByCard=function(i){ launchGuide(i); };
+window._startGuideById=function(i){
+  const a=currentAttractions[i];
   if(!a) return;
-  window._startGuide(a.name, currentCity+', '+currentCountry, a.name);
+  window._startGuide(a.name,currentCity+', '+currentCountry,a.name);
 };
 
 function toggleSpeak(){
