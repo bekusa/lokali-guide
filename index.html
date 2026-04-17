@@ -106,10 +106,13 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
     <div style="display:flex;gap:10px;margin-bottom:1.2rem">
       <div style="flex:1">
         <div class="section-label" id="label-visitor">ჩემი ინტერესი</div>
-        <div style="position:relative">
-          <select id="visitor-type" style="width:100%;padding:9px 13px;border-radius:10px;border:1.5px solid #e5e5e0;font-size:13px;color:#222;background:white;appearance:none;cursor:pointer">
-          </select>
-          <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;color:#aaa;pointer-events:none">▼</span>
+        <div style="position:relative" id="visitor-dropdown-wrap">
+          <div id="visitor-selected" onclick="toggleVisitorMenu()" style="display:flex;align-items:center;gap:7px;padding:9px 13px;border-radius:10px;border:1.5px solid #e5e5e0;cursor:pointer;background:white;user-select:none">
+            <span id="visitor-icon" style="font-size:15px">🧳</span>
+            <span id="visitor-name" style="font-size:13px;color:#222;flex:1">პირველი ვიზიტი</span>
+            <span style="font-size:10px;color:#aaa">▼</span>
+          </div>
+          <div id="visitor-menu" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:white;border:1.5px solid #e5e5e0;border-radius:10px;overflow:hidden;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,0.08);max-height:220px;overflow-y:auto"></div>
         </div>
       </div>
       <div style="flex:1">
@@ -335,11 +338,49 @@ const DURATION_OPTIONS=[
   {dur:12, icon:'🎬', labels:{ka:'12 წთ',en:'12 min',ru:'12 мин',tr:'12 dk',de:'12 Min',fr:'12 min',es:'12 min',it:'12 min',zh:'12分钟',ja:'12分',ko:'12분',ar:'١٢ دق'}},
 ];
 
+let selectedVisitorType = 'first-time tourist';
+
 function renderVisitorTypes(){
-  const sel=document.getElementById('visitor-type');
-  const curVal=sel.value||'first-time tourist';
-  sel.innerHTML=VISITOR_TYPES.map(v=>`<option value="${v.value}" ${v.value===curVal?'selected':''}>${v.icon} ${v.labels[lang]||v.labels['en']}</option>`).join('');
+  const menu = document.getElementById('visitor-menu');
+  if(!menu) return;
+  menu.innerHTML = VISITOR_TYPES.map(v=>{
+    const label = v.labels[lang]||v.labels['en'];
+    const isActive = v.value === selectedVisitorType;
+    return `<div onclick="selectVisitor('${v.value}','${v.icon}')"
+      style="display:flex;align-items:center;gap:9px;padding:9px 13px;cursor:pointer;font-size:13px;background:${isActive?'#f0faf6':'white'};transition:background 0.1s"
+      onmouseenter="this.style.background='#f5f5f0'" onmouseleave="this.style.background='${isActive?'#f0faf6':'white'}'">
+      <span style="font-size:16px">${v.icon}</span>
+      <span style="color:#222">${label}</span>
+    </div>`;
+  }).join('');
+  // Update selected display
+  const cur = VISITOR_TYPES.find(v=>v.value===selectedVisitorType)||VISITOR_TYPES[0];
+  const nameEl = document.getElementById('visitor-name');
+  const iconEl = document.getElementById('visitor-icon');
+  if(nameEl) nameEl.textContent = cur.labels[lang]||cur.labels['en'];
+  if(iconEl) iconEl.textContent = cur.icon;
 }
+
+function selectVisitor(value, icon){
+  selectedVisitorType = value;
+  const cur = VISITOR_TYPES.find(v=>v.value===value);
+  document.getElementById('visitor-name').textContent = cur.labels[lang]||cur.labels['en'];
+  document.getElementById('visitor-icon').textContent = icon;
+  document.getElementById('visitor-menu').style.display='none';
+}
+
+function toggleVisitorMenu(){
+  const m = document.getElementById('visitor-menu');
+  if(m.style.display==='none'){ renderVisitorTypes(); m.style.display='block'; }
+  else m.style.display='none';
+}
+
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#visitor-dropdown-wrap')) {
+    const m=document.getElementById('visitor-menu');
+    if(m) m.style.display='none';
+  }
+});
 
 function renderDurationButtons(){
   const container=document.getElementById('dur-buttons');
@@ -514,7 +555,7 @@ async function fetchInfo(placeEn,location,placeDisplay){
     const res=await fetch(GUIDE_WEBHOOK,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({place:placeEn,location,language:langFull,visitor_type:document.getElementById('visitor-type').value,duration:selectedDuration})
+      body:JSON.stringify({place:placeEn,location,language:langFull,visitor_type:selectedVisitorType,duration:selectedDuration})
     });
     const raw=await res.text();
     let data;
