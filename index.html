@@ -719,7 +719,8 @@ async function fetchInfo(placeEn,location,placeDisplay){
 function renderGuide(data){
   const secs=data.estimated_duration_seconds||0;
   const mins=Math.round(secs/60);
-  const scriptHtml=(data.script||'').split(/\n\n+/).filter(p=>p.trim()).map(p=>{
+  const _script=(data.script||'').replace(/\\n/g,'\n').replace(/\\t/g,' ');
+  const scriptHtml=_script.split(/\n\n+/).filter(p=>p.trim()).map(p=>{
     const clean=p.trim().replace(/\[PAUSE\]/g,'<span class="pause-tag">⏸</span>');
     return `<p style="margin-bottom:13px">${clean}</p>`;
   }).join('');
