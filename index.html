@@ -653,15 +653,16 @@ function showLoading(placeDisplay){
 
 function parseGuideResponse(raw, fallbackTitle){
   let text = raw.trim();
-  // Strip markdown fences
-  if(text.startsWith('```')){
-    text = text.replace(/^```[a-zA-Z]*/, '').replace(/```\s*$/, '').trim();
-  }
+  // Strip markdown fences - handle ```json\n...\n``` pattern
+  text = text.replace(/^```[a-zA-Z]*\n?/, '').replace(/\n?```$/, '').trim();
   // Try direct parse
   try { return JSON.parse(text); } catch(e){}
-  // Try extracting first {...} block
-  const m = text.match(/\{[\s\S]*\}/);
-  if(m){ try { return JSON.parse(m[0]); } catch(e){} }
+  // Try extracting first {...} block (greedy)
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if(start !== -1 && end !== -1 && end > start){
+    try { return JSON.parse(text.slice(start, end+1)); } catch(e){}
+  }
   // Fallback: treat as plain script
   return {title:fallbackTitle, script:text, key_facts:[], tips:[], look_for:[], nearby_suggestions:[]};
 }
