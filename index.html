@@ -50,8 +50,10 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
 .result-duration{font-size:11px;opacity:0.8;margin-top:2px}
 .result-body{padding:14px;display:flex;flex-direction:column;gap:14px}
 .section-head{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#999;margin-bottom:7px}
-.script-text{font-size:14px;color:#333;line-height:1.75}
-.pause-tag{display:inline-block;background:#e8f5ee;color:#0F6E56;font-size:10px;padding:1px 6px;border-radius:4px;margin:0 2px;font-weight:700}
+.script-text{font-size:14px;color:#333;line-height:1.8}
+.script-para{margin:0 0 18px 0;text-indent:0}
+.script-para:last-child{margin-bottom:0}
+.script-para:first-letter{font-size:1.05em}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{padding:5px 10px;border-radius:20px;font-size:12px;line-height:1.4}
 .chip-green{background:#e8f5ee;color:#0F6E56}
@@ -64,11 +66,15 @@ body{background:#f0f0eb;min-height:100vh;display:flex;align-items:flex-start;jus
 .speak-btn:hover{border-color:#1D9E75;color:#1D9E75}
 .duration-badge{font-size:11px;color:#aaa;margin-left:auto}
 .map-container{border-radius:14px;overflow:hidden;border:1.5px solid #eee;margin-bottom:12px;height:220px}
-.attr-card{border-radius:12px;border:1.5px solid #eee;overflow:hidden;transition:border-color 0.15s}
+.attr-card{border-radius:12px;border:1.5px solid #eee;overflow:hidden;transition:border-color 0.15s;position:relative}
+.attr-card.featured{border:1.5px solid #1D9E75;box-shadow:0 2px 10px rgba(29,158,117,0.12)}
 .attr-img{width:100%;height:140px;object-fit:cover;display:block;background:#f0f0eb}
 .attr-img-wrap{position:relative;overflow:hidden}
 .attr-img-num{position:absolute;top:8px;left:8px;background:#1D9E75;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
 .attr-card:hover{border-color:#1D9E75}
+.featured-badge{position:absolute;top:8px;right:8px;background:#1D9E75;color:white;font-size:10px;font-weight:700;padding:4px 9px;border-radius:12px;letter-spacing:0.3px;z-index:2;box-shadow:0 2px 6px rgba(0,0,0,0.15)}
+.section-divider{display:flex;align-items:center;gap:10px;margin:6px 0 2px 2px;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.5px}
+.section-divider:before,.section-divider:after{content:'';flex:1;height:1px;background:#eee}
 .attr-header{display:flex;align-items:center;gap:10px;padding:11px 13px;cursor:pointer;background:white}
 .attr-score{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:28px}
 .attr-score-num{font-size:16px;font-weight:700;color:#1D9E75;line-height:1}
@@ -233,9 +239,9 @@ const LANGUAGES=[
 ];
 
 const UI={
-  ka:{place:'ადგილი',popular:'პოპულარული ადგილები',search:'ნებისმიერი ადგილი...',ask:'კითხვა',tagline:'AI მოგზაურობის გიდი — ყველა ენაზე',lang_label:'ენა',nearby:'📍 ჩემთან ახლოს სანახაობები',loading_attr:'ლოკაცია და სანახაობები...',loading_guide:'AI გიდი მზადდება...',audio:'▶ ხმოვანი გიდი',stop:'■ გაჩერება',visitor_label:'ჩემი ინტერესი',duration_label:'ხანგრძლივობა',tab_nearby:'📍 ადგილები',tab_guide:'🎧 გიდი',search_btn:'📍 ძებნა',gps_btn:'🎯 GPS-ით ავტო-აღმოჩენა',city_ph:'ქალაქი (მაგ: თბილისი)...',map_lbl:'🗺️ რუკა',ph_nearby:'ჩაწერე ქალაქი და<br>იპოვე სანახაობები',ph_guide:'ადგილებიდან აირჩიე სანახაობა<br>და მიიღე პერსონალური აუდიო გიდი',script:'🎙️ სკრიპტი',facts:'💡 ძირითადი ფაქტები',look:'👁️ ყურადღება მიაქციე',tips:'🗺️ პრაქტიკული რჩევები',nb:'☕ ახლოს',full_guide:'🎧 სრული აუდიო გიდი'},
-  en:{place:'Place',popular:'Popular Places',search:'Any place...',ask:'Search',tagline:'AI Travel Guide — Every Language',lang_label:'Language',nearby:'📍 Nearby Attractions',loading_attr:'Finding your location...',loading_guide:'AI guide preparing...',audio:'▶ Audio Guide',stop:'■ Stop',visitor_label:'My Interest',duration_label:'Duration',tab_nearby:'📍 Places',tab_guide:'🎧 Guide',search_btn:'📍 Search',gps_btn:'🎯 Auto-detect GPS',city_ph:'City (e.g. Paris)...',map_lbl:'🗺️ Map',ph_nearby:'Enter a city and<br>discover attractions',ph_guide:'Choose an attraction<br>to get your audio guide',script:'🎙️ Script',facts:'💡 Key Facts',look:'👁️ Look For',tips:'🗺️ Practical Tips',nb:'☕ Nearby',full_guide:'🎧 Full Audio Guide'},
-  ru:{place:'Место',popular:'Популярные места',search:'Любое место...',ask:'Найти',tagline:'AI Аудиогид — На любом языке',lang_label:'Язык',nearby:'📍 Рядом со мной',loading_attr:'Определяем локацию...',loading_guide:'ИИ готовит гид...',audio:'▶ Аудиогид',stop:'■ Стоп',visitor_label:'Мои интересы',duration_label:'Длительность',tab_nearby:'📍 Места',tab_guide:'🎧 Гид',search_btn:'📍 Поиск',gps_btn:'🎯 GPS-определение',city_ph:'Город (напр. Тбилиси)...',map_lbl:'🗺️ Карта',ph_nearby:'Введите город и<br>найдите достопримечательности',ph_guide:'Выберите место<br>для аудиогида',script:'🎙️ Текст',facts:'💡 Ключевые факты',look:'👁️ Обратите внимание',tips:'🗺️ Советы',nb:'☕ Рядом',full_guide:'🎧 Полный аудиогид'},
+  ka:{place:'ადგილი',popular:'პოპულარული ადგილები',search:'ნებისმიერი ადგილი...',ask:'კითხვა',tagline:'AI მოგზაურობის გიდი — ყველა ენაზე',lang_label:'ენა',nearby:'📍 ჩემთან ახლოს სანახაობები',loading_attr:'ლოკაცია და სანახაობები...',loading_guide:'AI გიდი მზადდება...',audio:'▶ ხმოვანი გიდი',stop:'■ გაჩერება',visitor_label:'ჩემი ინტერესი',duration_label:'ხანგრძლივობა',tab_nearby:'📍 ადგილები',tab_guide:'🎧 გიდი',search_btn:'📍 ძებნა',gps_btn:'🎯 GPS-ით ავტო-აღმოჩენა',city_ph:'ქალაქი ან ღირშესანიშნაობა...',map_lbl:'🗺️ რუკა',ph_nearby:'ჩაწერე ქალაქი ან ღირშესანიშნაობა<br>და იპოვე სანახაობები',ph_guide:'ადგილებიდან აირჩიე სანახაობა<br>და მიიღე პერსონალური აუდიო გიდი',script:'🎙️ სკრიპტი',facts:'💡 ძირითადი ფაქტები',look:'👁️ ყურადღება მიაქციე',tips:'🗺️ პრაქტიკული რჩევები',nb:'☕ ახლოს',full_guide:'🎧 სრული აუდიო გიდი',featured:'✨ შენი არჩევანი',nearby_to:'ახლომდებარე'},
+  en:{place:'Place',popular:'Popular Places',search:'Any place...',ask:'Search',tagline:'AI Travel Guide — Every Language',lang_label:'Language',nearby:'📍 Nearby Attractions',loading_attr:'Finding your location...',loading_guide:'AI guide preparing...',audio:'▶ Audio Guide',stop:'■ Stop',visitor_label:'My Interest',duration_label:'Duration',tab_nearby:'📍 Places',tab_guide:'🎧 Guide',search_btn:'📍 Search',gps_btn:'🎯 Auto-detect GPS',city_ph:'City or landmark...',map_lbl:'🗺️ Map',ph_nearby:'Enter a city or landmark<br>and discover attractions',ph_guide:'Choose an attraction<br>to get your audio guide',script:'🎙️ Script',facts:'💡 Key Facts',look:'👁️ Look For',tips:'🗺️ Practical Tips',nb:'☕ Nearby',full_guide:'🎧 Full Audio Guide',featured:'✨ Your Pick',nearby_to:'Nearby'},
+  ru:{place:'Место',popular:'Популярные места',search:'Любое место...',ask:'Найти',tagline:'AI Аудиогид — На любом языке',lang_label:'Язык',nearby:'📍 Рядом со мной',loading_attr:'Определяем локацию...',loading_guide:'ИИ готовит гид...',audio:'▶ Аудиогид',stop:'■ Стоп',visitor_label:'Мои интересы',duration_label:'Длительность',tab_nearby:'📍 Места',tab_guide:'🎧 Гид',search_btn:'📍 Поиск',gps_btn:'🎯 GPS-определение',city_ph:'Город или достопримечательность...',map_lbl:'🗺️ Карта',ph_nearby:'Введите город или место<br>и найдите достопримечательности',ph_guide:'Выберите место<br>для аудиогида',script:'🎙️ Текст',facts:'💡 Ключевые факты',look:'👁️ Обратите внимание',tips:'🗺️ Советы',nb:'☕ Рядом',full_guide:'🎧 Полный аудиогид',featured:'✨ Ваш выбор',nearby_to:'Рядом'},
 };
 
 function t(key){ return (UI[lang]||UI['en'])[key]||UI['en'][key]||key; }
@@ -405,46 +411,122 @@ function renderCards(){
 }
 
 // ========== NEARBY ATTRACTIONS ==========
+// Heuristic: decide if a Nominatim hit is a specific POI/landmark vs a city/admin region
+const CITY_TYPES = new Set(['city','town','village','hamlet','county','state','country','region','suburb','municipality','administrative','borough','district','quarter']);
+const CITY_CLASSES = new Set(['place','boundary']);
+function classifyHit(hit){
+  const type=(hit.type||'').toLowerCase();
+  const cls=(hit.class||'').toLowerCase();
+  if(CITY_CLASSES.has(cls) || CITY_TYPES.has(type)) return 'city';
+  // tourism, historic, leisure, amenity, building, natural, etc. → treat as landmark
+  return 'landmark';
+}
+function landmarkIconFor(hit){
+  const cls=(hit.class||'').toLowerCase(), type=(hit.type||'').toLowerCase();
+  if(cls==='tourism' && type==='museum') return '🎨';
+  if(cls==='tourism') return '🏛️';
+  if(cls==='historic') return '🏰';
+  if(cls==='leisure' || cls==='natural') return '🌿';
+  if(cls==='amenity' && (type==='place_of_worship'||type==='church'||type==='cathedral'||type==='mosque'||type==='temple')) return '⛪';
+  if(cls==='building') return '🏛️';
+  return '📍';
+}
+
 async function loadNearbyAttractions(){
-  const cityVal = document.getElementById('city-input').value.trim();
-  if(!cityVal){ alert('ჩაწერე ქალაქის სახელი'); return; }
+  const queryVal = document.getElementById('city-input').value.trim();
+  if(!queryVal){ alert(t('city_ph')); return; }
   const btn=document.getElementById('locate-btn');
   btn.disabled=true;
   (document.getElementById('attractions-area')||{}).innerHTML=`<div style="padding:24px;text-align:center"><div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><p style="font-size:12px;color:#bbb;margin-top:10px">${t('loading_attr')}</p></div>`;
 
   try {
-    // Geocode the entered city
-    const geo=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityVal)}&format=json&limit=1`,{headers:{'Accept-Language':'en'}});
-    const geoData=await geo.json();
-    let lat=41.6938, lng=44.8015, city=cityVal, country='';
+    // Geocode with structured address details so we can tell city vs landmark
+    const geo = await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(queryVal)+'&format=json&addressdetails=1&limit=1',{headers:{'Accept-Language':'en'}});
+    const geoData = await geo.json();
+
+    let lat=41.6938, lng=44.8015, city=queryVal, country='', kind='city', landmark=null;
     if(geoData.length>0){
-      lat=parseFloat(geoData[0].lat);
-      lng=parseFloat(geoData[0].lon);
-      const parts=geoData[0].display_name.split(',');
-      city=parts[0].trim();
-      country=parts[parts.length-1].trim();
+      const hit = geoData[0];
+      lat = parseFloat(hit.lat);
+      lng = parseFloat(hit.lon);
+      const addr = hit.address || {};
+      country = addr.country || (hit.display_name.split(',').pop()||'').trim();
+      const resolvedCity = addr.city || addr.town || addr.village || addr.county || addr.state || '';
+      kind = classifyHit(hit);
+      if(kind==='landmark'){
+        const name = hit.name || (hit.display_name.split(',')[0]||'').trim() || queryVal;
+        landmark = {
+          name,
+          icon: landmarkIconFor(hit),
+          type: (hit.class||'landmark'),
+          lat, lng,
+          address: hit.display_name
+        };
+        city = resolvedCity || queryVal;
+      } else {
+        city = resolvedCity || (hit.display_name.split(',')[0]||'').trim() || queryVal;
+      }
     }
 
     if(map){
-      map.setCenter({lat,lng}); map.setZoom(13);
-      // user location dot
+      map.setCenter({lat,lng}); map.setZoom(kind==='landmark'?15:13);
       new google.maps.Marker({
         position:{lat,lng}, map,
         icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:'#185FA5',fillOpacity:1,strokeColor:'white',strokeWeight:2},
-        title:'You are here', zIndex:999
+        title: landmark ? landmark.name : 'You are here', zIndex:999
       });
     }
     document.getElementById('map-area').style.display='block';
 
+    // Build the city/context string sent to Claude. If landmark: "Landmark, City" so Claude features it.
+    const cityParam = landmark ? (landmark.name + (city ? ', ' + city : '')) : city;
+
     const res=await fetch(ATTRACTIONS_WEBHOOK,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({city,country,lat,lng,language:langFull})
+      body:JSON.stringify({city: cityParam, country, lat, lng, language: langFull})
     });
     const raw=await res.text();
     const data=parseGuideResponse(raw, city);
 
-    renderAttractions(data.attractions||[],city,country,lat,lng);
+    let attractions = data.attractions || [];
+
+    // If user searched a specific landmark, make sure it's the first card.
+    if(landmark){
+      const norm = s => String(s||'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,'');
+      const lm = norm(landmark.name);
+      // Find Claude's result that matches the landmark
+      const matchIdx = attractions.findIndex(a => {
+        const an = norm(a.name);
+        return an && (an.includes(lm) || lm.includes(an));
+      });
+      if(matchIdx > 0){
+        // Move match to first
+        const [m] = attractions.splice(matchIdx, 1);
+        m._featured = true;
+        attractions.unshift(m);
+      } else if(matchIdx === 0){
+        attractions[0]._featured = true;
+      } else {
+        // Claude didn't include it — synthesize a featured card from Nominatim data
+        attractions.unshift({
+          name: landmark.name,
+          type: landmark.type,
+          outside_desc: landmark.address,
+          inside_desc: '',
+          appeal_score: '—',
+          visit_duration: '',
+          best_time: '',
+          icon: landmark.icon,
+          lat: landmark.lat,
+          lng: landmark.lng,
+          _featured: true,
+          _synthetic: true
+        });
+      }
+    }
+
+    renderAttractions(attractions, city, country, lat, lng, landmark);
   } catch(e){
     (document.getElementById('attractions-area')||{}).innerHTML=`<div class="placeholder-box"><div class="ph-icon">⚠️</div><p>${e.message}</p></div>`;
   }
@@ -486,7 +568,7 @@ function fetchPlacePhoto(name, callback){
 }
 
 let currentAttractions=[], currentCardIndex=-1;
-function renderAttractions(attractions,city,country,lat,lng){
+function renderAttractions(attractions,city,country,lat,lng,landmark){
   currentCity=city; currentCountry=country;
   currentAttractions=attractions;
   const typeIcons={landmark:'🏛️',museum:'🎨',nature:'🌿',religious:'⛪',historic:'🏰'};
@@ -504,11 +586,13 @@ function renderAttractions(attractions,city,country,lat,lng){
     attractions.forEach((a,i)=>{
       const addMarker = (alat,alng)=>{
         if(!alat||!alng||isNaN(alat)||isNaN(alng)) return;
+        const isFeatured = !!a._featured;
         const marker = new google.maps.Marker({
           position:{lat:alat,lng:alng}, map,
           title:a.name,
-          label:{text:String(i+1),color:'white',fontSize:'11px',fontWeight:'bold'},
-          icon:{path:google.maps.SymbolPath.CIRCLE,scale:15,fillColor:'#1D9E75',fillOpacity:1,strokeColor:'white',strokeWeight:2}
+          label:{text:String(i+1),color:'white',fontSize:isFeatured?'13px':'11px',fontWeight:'bold'},
+          icon:{path:google.maps.SymbolPath.CIRCLE,scale:isFeatured?19:15,fillColor:isFeatured?'#854F0B':'#1D9E75',fillOpacity:1,strokeColor:'white',strokeWeight:isFeatured?3:2},
+          zIndex:isFeatured?900:undefined
         });
         const nm = a.name.replace(/'/g,'&apos;');
         const loc = city+', '+country;
@@ -534,8 +618,26 @@ function renderAttractions(attractions,city,country,lat,lng){
     });
   }
 
-  const cards=attractions.map((a,i)=>`
-    <div class="attr-card" id="attr-card-${i}">
+  // Render a single card. Featured/synthetic cards get special treatment.
+  const renderCard = (a,i) => {
+    const isFeatured = !!a._featured;
+    const isSynthetic = !!a._synthetic;
+    const scoreHtml = (a.appeal_score && a.appeal_score !== '—')
+      ? `<div class="attr-score">
+          <div class="attr-score-num">${a.appeal_score}</div>
+          <div class="attr-score-label">/ 10</div>
+        </div>` : '';
+    const insideHtml = a.inside_desc
+      ? `<p style="font-size:13px;color:#444;line-height:1.6;margin:10px 0 8px">${a.inside_desc}</p>` : '';
+    const chipsHtml = (a.best_time || a.visit_duration)
+      ? `<div class="chips" style="margin-bottom:12px">
+          ${a.best_time ? `<span class="chip chip-amber">⭐ ${a.best_time}</span>` : ''}
+          ${a.visit_duration ? `<span class="chip chip-green">⏱ ${a.visit_duration}</span>` : ''}
+        </div>` : '';
+    const typeLine = [a.type||'', a.visit_duration ? ('⏱ '+a.visit_duration) : ''].filter(Boolean).join(' · ');
+    return `
+    <div class="attr-card${isFeatured?' featured':''}" id="attr-card-${i}">
+      ${isFeatured ? `<div class="featured-badge">${t('featured')}</div>` : ''}
       <div class="attr-img-wrap">
         <img class="attr-img" id="attr-img-${i}" src="" alt="${a.name}" style="display:none" />
         <div id="attr-img-placeholder-${i}" class="attr-img" style="background:#f0f5f0;display:flex;align-items:center;justify-content:center;font-size:28px">${a.icon||typeIcons[a.type]||'📍'}</div>
@@ -543,21 +645,15 @@ function renderAttractions(attractions,city,country,lat,lng){
       </div>
       <div class="attr-header" onclick="toggleAttr(${i})">
         <div style="flex:1">
-          <div class="card-type">${a.type||''} · ⏱ ${a.visit_duration||''}</div>
+          <div class="card-type">${typeLine}</div>
           <div class="card-name">${a.name}</div>
           <div style="font-size:12px;color:#666;margin-top:3px;line-height:1.4">${a.outside_desc||''}</div>
         </div>
-        <div class="attr-score">
-          <div class="attr-score-num">${a.appeal_score||''}</div>
-          <div class="attr-score-label">/ 10</div>
-        </div>
+        ${scoreHtml}
       </div>
       <div class="attr-detail" id="attr-${i}">
-        <p style="font-size:13px;color:#444;line-height:1.6;margin:10px 0 8px">${a.inside_desc||''}</p>
-        <div class="chips" style="margin-bottom:12px">
-          <span class="chip chip-amber">⭐ ${a.best_time||''}</span>
-          <span class="chip chip-green">⏱ ${a.visit_duration||''}</span>
-        </div>
+        ${insideHtml}
+        ${chipsHtml}
         <div style="border-top:1px solid #f0f0ea;padding-top:12px">
           <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#aaa;margin-bottom:5px">${t('visitor_label')}</div>
           <div id="cvw-${i}" style="position:relative;margin-bottom:10px">
@@ -577,14 +673,39 @@ function renderAttractions(attractions,city,country,lat,lng){
           ${t('full_guide')}
         </button>
       </div>
-    </div>`).join('');
+    </div>`;
+  };
+
+  // Split featured from the rest so we can insert a "Nearby" divider when landmark mode is active.
+  const cardsHtml = (() => {
+    if(landmark){
+      const featuredBlock = attractions
+        .map((a,i)=>({a,i}))
+        .filter(x=>x.a._featured)
+        .map(x=>renderCard(x.a,x.i))
+        .join('');
+      const nearbyBlock = attractions
+        .map((a,i)=>({a,i}))
+        .filter(x=>!x.a._featured)
+        .map(x=>renderCard(x.a,x.i))
+        .join('');
+      const divider = nearbyBlock
+        ? `<div class="section-divider">${t('nearby_to')} ${landmark.name}</div>` : '';
+      return featuredBlock + divider + nearbyBlock;
+    }
+    return attractions.map((a,i)=>renderCard(a,i)).join('');
+  })();
+
+  const headerLocation = landmark
+    ? `${landmark.icon||'📍'} ${landmark.name}${city?(' · '+city):''}${country?(', '+country):''}`
+    : `📍 ${city}${country?(', '+country):''}`;
 
   (document.getElementById('attractions-area')||{}).innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-      <span style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.5px">📍 ${city}, ${country}</span>
+      <span style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.5px">${headerLocation}</span>
       <span style="font-size:11px;color:#bbb">${attractions.length} ადგილი</span>
     </div>
-    <div style="display:flex;flex-direction:column;gap:8px">${cards}</div>`;
+    <div style="display:flex;flex-direction:column;gap:8px">${cardsHtml}</div>`;
   // Load images via Google Places API
   attractions.forEach((a,i)=>{
     fetchPlacePhoto(a.name, imgUrl=>{
@@ -774,10 +895,16 @@ async function fetchInfo(placeEn,location,placeDisplay){
 function renderGuide(data){
   const secs=data.estimated_duration_seconds||0;
   const mins=Math.round(secs/60);
-  const _script=(data.script||'').replace(/\\n/g,'\n').replace(/\\t/g,' ');
-  const scriptHtml=_script.split(/\n\n+/).filter(p=>p.trim()).map(p=>{
-    const clean=p.trim().replace(/\[PAUSE\]/g,'<span class="pause-tag">⏸</span>');
-    return `<p style="margin-bottom:13px">${clean}</p>`;
+  // Normalize escapes
+  let _script=(data.script||'').replace(/\\n/g,'\n').replace(/\\t/g,' ');
+  // Turn pause markers into paragraph breaks (keeps original lastScript intact for TTS)
+  const _display=_script
+    .replace(/\[PAUSE\]/g,'\n\n')
+    .replace(/\[pause\]/g,'\n\n')
+    .replace(/⏸/g,'\n\n')
+    .replace(/\n{3,}/g,'\n\n');
+  const scriptHtml=_display.split(/\n\n+/).filter(p=>p.trim()).map(p=>{
+    return `<p class="script-para">${p.trim()}</p>`;
   }).join('');
   const keyFacts=(data.key_facts||[]).map(f=>`<span class="chip chip-green">💡 ${f}</span>`).join('');
   const tipIcons=['🕐','📸','☕','👗','⏱️'];
